@@ -37,10 +37,6 @@ char* newString(const char* Str){
     return Rs;
 }
 
-//char* Concat_Izq_with_Der(void* _Izq, void* _Der, char It, char Dt){
-    
-//}
-
 char* Concat_Izq_with_Der(void* _Izq, void* _Der, char It, char Dt){
 
     char* Izq = newString(100);
@@ -108,12 +104,54 @@ char* Concat_Izq_with_Der(void* _Izq, void* _Der, char It, char Dt){
 
 }
 
-void ByRef_ArrayClear(char** Str){
+void String_ByRef_ArrayClear(char** Str){
 
 }
 
-void ByRef_AvoidQuotationMarks(char** STR){
+void String_ByRef_AvoidQuotationMarks(char** STR){
 
+}
+
+int String_IsEmpty(char* MStr){
+    int Ln = strlen(MStr);
+    int cnt = 0;
+    while(cnt < Ln){
+        char Tmp = *(MStr + cnt);
+        if(Tmp != '^'){
+            return 0;
+        }
+        cnt++;
+    }
+    return 1;
+}
+
+char* StringCloneWithOut(char* SRC,char Sym){
+
+    int Nm = 0;
+    char Tmp;
+
+    char* CD = newString(SRC);
+    //Destruye la Cadena original
+    while ((Tmp = *CD++), ((Tmp == Sym)? ++Nm : 0), Tmp);
+
+    if(Nm == 0){
+        return SRC;
+    }
+
+    char* Rs = newString(strlen(SRC) - Nm);
+
+    int i = 0;
+    int cnt = 0;
+    
+    while(SRC[cnt] != '\0'){
+        if(SRC[cnt] != Sym){
+            Rs[i] = SRC[cnt];
+            i++;
+        }
+        cnt++;
+    }
+
+    return Rs;
 }
 
 /*
