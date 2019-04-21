@@ -9,6 +9,7 @@
 #include "Fw/DoublyGenericList.h"
 #include "Fw/StringHandler.h"
 #include "Container.h"
+#include "F1_cmd.h"
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ T O O L S
@@ -24,8 +25,69 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         Prm_Izq = (char*)DeQueue(CommandList);
         Prm_Der = (char*)DeQueue(CommandList);
 
-        /*
+        if(strcmp(Prm_Izq,"-path") != 0){
+            if(Prm_Der != NULL){
+                String_ByRef_toLower(&Prm_Der);
+            }
+        }
 
+        //(^< ............ ............ ............   _size
+        if(strcmp(Prm_Izq,"-size") == 0){
+            int Nm = atoi(Prm_Der);
+            (*nwInf)->_size =  atoi(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _fit
+        if(strcmp(Prm_Izq,"-fit") == 0){
+            (*nwInf)->_fit = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _unit
+        if(strcmp(Prm_Izq,"-unit") == 0){
+            (*nwInf)->_unit = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _path
+        if(strcmp(Prm_Izq,"-path") == 0){
+            (*nwInf)->_path = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _type
+        if(strcmp(Prm_Izq,"-type") == 0){
+            (*nwInf)->_type = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _delete
+        if(strcmp(Prm_Izq,"_delete") == 0){
+            (*nwInf)->_delete = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _add
+        if(strcmp(Prm_Izq,"-add") == 0){
+            int Nm = atoi(Prm_Der);
+            (*nwInf)->_add =  atoi(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _name
+        if(strcmp(Prm_Izq,"_name") == 0){
+            (*nwInf)->_name = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _id
+        if(strcmp(Prm_Izq,"_id") == 0){
+            (*nwInf)->_id = newString(Prm_Der);
+            continue;
+        }
+
+        /*
         if(strcasecmp(Prm_Izq,"-path") && strcasecmp(Prm_Izq,"-cont")){
             if(Prm_Der != NULL){
                 String_To_Lower(&Prm_Der);
@@ -194,34 +256,13 @@ void Exec_CMD(DoublyGenericList* CommandList){
     }
 }
 
-
 void FillCommandList(char* Bf,DoublyGenericList* CommandList){
 
-    Bf = StringCloneWithOut(Bf,'\t');
-    Bf = StringCloneWithOut(Bf,'\r');
-    Bf = StringCloneWithOut(Bf,'\"');
-    Bf = StringCloneWithOut(Bf,'\'');
-
     while(1){
+
         Bf = strtok(NULL," ~:~");
         if(Bf == NULL){
             break;
-        }
-
-        Bf = StringCloneWithOut(Bf,' ');
-
-        int Lst = strlen(Bf) - 1;
-
-        if(Bf[Lst] == '\n'){
-            Bf[Lst] = '\0';
-        }
-
-        if(Bf[Lst] == ' '){
-            Bf[Lst] = '\0';
-        }
-
-        if(Bf[Lst] == '\r'){
-            Bf[Lst] = '\0';
         }
 
         EnQueue(CommandList,Bf);
@@ -269,11 +310,14 @@ char *CatchCommandLine(){
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
 void mk_disk_cmd(InfoCatcher* nwInf){
+    //Check
 
+    mkdisk_do(nwInf);
 }
 
 void rm_disk_cmd(InfoCatcher* nwInf){
-
+    //Check
+    rmdisk_do(nwInf);
 }
 
 void f_disk_cmd(InfoCatcher* nwInf){
@@ -326,6 +370,10 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
     }
     else if(strcasecmp(Bf, "unmount") == 0){
         unmount_cmd(nwInf);
+        return 0;
+    }
+    else if(strcasecmp(Bf, "pause") == 0){
+        getchar();
         return 0;
     }
     return 1;
@@ -439,6 +487,12 @@ void ExecuteComand(char *InputString){
         return;
     }
 
+    InputString = StringCloneWithOut(InputString,'\t');
+    InputString = StringCloneWithOut(InputString,'\r');
+    InputString = StringCloneWithOut(InputString,'\"');
+    InputString = StringCloneWithOut(InputString,'\'');
+    InputString = StringCloneWithOut(InputString,'\n');
+
     if(strcasecmp(InputString, "Exit\n") == 0){
         printf("\n");
         printf("Saliendo de la APP...\n");
@@ -446,11 +500,10 @@ void ExecuteComand(char *InputString){
     }
 
     DoublyGenericList* CommandList = new_DoublyGenericList();
-    
-    char* Bf = strtok(InputString, "# \n");
 
+    char* Main_CMD = strtok(InputString, " ");
     int unknownCMD = 1;
-    FillCommandList(Bf,CommandList);
+    FillCommandList(Main_CMD,CommandList);
 
     // T E M P ----
     DoublyGenericList* tmpCL = new_DoublyGenericList();
@@ -465,28 +518,24 @@ void ExecuteComand(char *InputString){
     InfoCatcher* nwInf = newInfoCatcher();
     fillInfoCatcher(tmpCL,&nwInf);
 
-    unknownCMD = ScanF1(Bf,nwInf);
+    unknownCMD = ScanF1(Main_CMD,nwInf);
 
     if(unknownCMD != 0){
-        unknownCMD = ScanF2(Bf,nwInf);
+        unknownCMD = ScanF2(Main_CMD,nwInf);
     }
 
     if(unknownCMD != 0){
-        if (strcasecmp(Bf,"Exec") == 0){        
+        if (strcasecmp(Main_CMD,"Exec") == 0){        
             Exec_CMD(CommandList);
             while (CommandList->Length > 0)
             {
                 char* NewCommand = (char*)DeQueue(CommandList);
-                int Ln = strlen(NewCommand);
-                if (NewCommand[Ln - 1] == '\n'){
-                    NewCommand[Ln - 1] = '\0';
-                }
                 ExecuteComand(NewCommand);
             }   
         }
         else{
             printf("\n");
-            printf("Analizer ERROR: Comando: %s No Reconocido\n", Bf);
+            printf("Analizer ERROR: Comando: %s No Reconocido\n", Main_CMD);
         }
     }
     

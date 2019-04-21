@@ -108,8 +108,18 @@ void String_ByRef_ArrayClear(char** Str){
 
 }
 
-void String_ByRef_AvoidQuotationMarks(char** STR){
+void String_ByRef_AvoidQuotationMarks(char** Str){
 
+}
+
+void String_ByRef_toLower(char** MStr){
+    int Ln = strlen(*MStr);
+    int cnt = 0;
+    while (cnt < Ln) {
+        char Current = *(*MStr + cnt);
+        *(*MStr + cnt) = putchar(tolower(Current));
+        cnt++;
+    }
 }
 
 int String_IsEmpty(char* MStr){
@@ -152,6 +162,21 @@ char* StringCloneWithOut(char* SRC,char Sym){
     }
 
     return Rs;
+}
+
+int String_isNumber(char* Str){
+    int cnt = 0;
+    while(Str[cnt] != '\0'){
+        if(!isdigit(Str[cnt])){
+            return 0;
+        }
+        cnt++;
+    }
+
+    if(atoi(Str) < 0){
+        return 0;
+    }
+    return 1;
 }
 
 /*

@@ -12,6 +12,10 @@
 #include "StringHandler.h"
 #include "DoublyGenericList.h"
 
+#define Byte 1
+#define Kilo 1024
+#define Mega (Kilo * 1024)
+
 
 DoublyGenericList* PathSeparate(char* CompletePathDir){
 
@@ -105,6 +109,44 @@ char* Path_Get_LastDirName(char* CompletePathDir){
         LastDir  = (char*)Pop(PathList);
         return LastDir;
     }
+}
+
+int CalcSize_in_Bytes(int PD_Size,char Unit){
+
+    if(Unit =='b'){
+        return PD_Size;
+    }
+    if(Unit == 'k'){
+        return PD_Size * Kilo;
+    }
+    else if(Unit == 'm'){
+        return PD_Size * Mega;
+    }
+    else{
+        return -1;
+    }
+}
+
+int Validate_If_Path_Exists(char* Path){
+    DIR* Test = NULL;
+    Test = opendir(Path);
+    return Test? 1 : 0;
+}
+
+int CreatePathDir(char* Path){
+
+    if(Validate_If_Path_Exists(Path)){
+        return 1;
+    }
+
+    char NewPath[200];
+
+    // To get Permission on /home
+    // sudo chown -R $USER:$USER /home
+    snprintf(NewPath,sizeof(NewPath),"mkdir -p -v -m777 \"%s\"",Path);
+    system(NewPath);
+
+    return Validate_If_Path_Exists(Path)? 1:0;
 }
 
 
