@@ -7,7 +7,8 @@
         "stringhandler.h": "c",
         "fdisk.h": "c",
         "tabletyperep.h": "c",
-        "c_graphviz.h": "c"
+        "c_graphviz.h": "c",
+        "analizer.h": "c"
     },
     "workbench.colorCustomizations": {
         //"activityBar.background": "#06011b",

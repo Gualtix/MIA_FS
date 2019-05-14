@@ -43,6 +43,7 @@ typedef struct Partition
     int   part_start;
     int   part_size;
     char  part_name[16];
+    
 }Partition;
 
 Partition* newPartition(){
@@ -123,6 +124,25 @@ InfoCatcher* newInfoCatcher(){
     nwInfo->_add    = -1;
     nwInfo->_id     = NULL;
     return nwInfo;
+}
+
+typedef struct Batch
+{
+    int   StartByte;
+    int   Size;
+    int   EndByte;
+    char  Type;       
+    char* PartName;
+}Batch;
+
+Batch* newBatch(){
+    Batch* Bt = (Batch*)malloc(sizeof(Batch));
+
+    Bt->StartByte = -1;
+    Bt->Size      = -1;
+    Bt->EndByte   = -1;
+    Bt->Type      = '^';
+    Bt->PartName  = NULL;
 }
 
 

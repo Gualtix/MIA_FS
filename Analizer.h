@@ -9,7 +9,8 @@
 #include "Fw/DoublyGenericList.h"
 #include "Fw/StringHandler.h"
 #include "Container.h"
-#include "F1_cmd.h"
+#include "F1_do.h"
+#include "Rep/F1_Rep.h"
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ T O O L S
@@ -76,13 +77,13 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         }
 
         //(^< ............ ............ ............   _name
-        if(strcmp(Prm_Izq,"_name") == 0){
+        if(strcmp(Prm_Izq,"-name") == 0){
             (*nwInf)->_name = newString(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _id
-        if(strcmp(Prm_Izq,"_id") == 0){
+        if(strcmp(Prm_Izq,"-id") == 0){
             (*nwInf)->_id = newString(Prm_Der);
             continue;
         }
@@ -322,6 +323,88 @@ void rm_disk_cmd(InfoCatcher* nwInf){
 
 void f_disk_cmd(InfoCatcher* nwInf){
 
+    //(^< ............ ............ ............ ............ ............ C H E C K
+
+    //(^< ............ ............ ............ Obligatory
+    if(nwInf->_size == NULL && nwInf->_add == -1){
+        printf("\n");
+        printf("FDISK ERROR: Parametro Obligatorio -size Faltante\n");
+        return;
+    }
+
+    if(nwInf->_path == NULL){
+        printf("\n");
+        printf("FDISK ERROR: Parametro Obligatorio -path Faltante\n");
+        return;
+    }
+
+    if(nwInf->_name == NULL){
+        printf("\n");
+        printf("FDISK ERROR: Parametro Obligatorio -name Faltante\n");
+        return;
+    }
+    //(^< ............ ............ ............
+
+    //(^< ............ ............ ............ Default
+    if(nwInf->_unit == NULL){
+        nwInf->_unit[0] = 'k';
+    }
+
+    if(nwInf->_type == NULL){
+        nwInf->_type[0] = 'p';
+    }
+
+    if(nwInf->_fit == NULL){
+        nwInf->_fit = newString("wf");
+    }
+
+    //(^< ............ ............ ............
+
+    //(^< ............ ............ ............ BusinessRules
+    MBR* Disk = LoadMBR(nwInf->_path);
+
+    if(Disk == NULL){
+        printf("\n");
+        printf("FDISK ERROR: Disco No Encontrado\n");
+        return;
+    }
+    int nPrimary = MBRPartArray_PrimaryCounter(Disk);
+    int nExtended = MBRPartArray_ExtendedCounter(Disk);
+
+    int Sum = nPrimary + nExtended;
+
+    if(nExtended > 0 && nwInf->_type[0] == 'e'){
+        printf("\n");
+        printf("FDISK ERROR: Ya Existe una Particion Extendida\n");
+        return;
+    }
+
+    if(Sum == 4){
+        printf("\n");
+        printf("FDISK ERROR: Ya Existen 4 Particiones Titulares\n");
+        return;
+    }
+
+    if(nExtended == 0 && nwInf->_type[0] == 'l'){
+        printf("\n");
+        printf("FDISK ERROR: No Existe Particion Extendida para Crear Particion Logica\n");
+        return;
+    }
+
+    int NameExists = MBRPartArray_PartNameExists(Disk,nwInf->_name);
+    if(NameExists == 1){
+        printf("\n");
+        printf("FDISK ERROR: El Nombre de la Particion   -> %s <-   ya Existe\n",nwInf->_name);
+        return;
+    }
+
+    //(^< ............ ............ ............
+
+    
+    //(^< ............ ............ ............ ............ ............ D O
+
+    fdisk_do(nwInf,Disk);
+
 }
 
 void rep_cmd(InfoCatcher* nwInf){
@@ -350,6 +433,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
 
     if(strcasecmp(Bf, "mkdisk") == 0){
         mk_disk_cmd(nwInf);
+        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
         return 0;
     }
     else if(strcasecmp(Bf, "rmdisk") == 0){
@@ -358,6 +442,8 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
     }
     else if(strcasecmp(Bf, "fdisk") == 0){
         f_disk_cmd(nwInf);
+        GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+        getchar();
         return 0;
     }
     else if(strcasecmp(Bf, "rep") == 0){
@@ -539,7 +625,7 @@ void ExecuteComand(char *InputString){
         }
     }
     
-    getchar();
+    //getchar();
 }
 
 

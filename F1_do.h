@@ -1,5 +1,5 @@
-#ifndef F1_CMD_H
-#define F1_CMD_H
+#ifndef F1_DO_H
+#define F1_DO_H
 
 #include "Container.h"
 #include "Fw/Helper.h"
@@ -112,8 +112,67 @@ void rmdisk_do(InfoCatcher* nwInf){
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
 
-void fdisk_do(InfoCatcher* nwInf){
+void BestFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
+}
+
+void WorstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
+
+}
+
+void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
+    int SpNeeded = nwInf->_size;
+    int cnt = 0;
+    Batch* batiSpot = NULL;
+
+    while(cnt < batchList->Length){
+        batiSpot = (Batch*)(getNodebyIndex(batchList,cnt)->Dt);
+        if(SpNeeded <= batiSpot->Size && batiSpot->Type == 's'){
+            Partition* Part = newPartition();
+
+            Part->part_fit[0] = nwInf->_fit[0];
+            Part->part_fit[1] = nwInf->_fit[1];
+
+            strcpy(Part->part_name,newString(nwInf->_name));
+            Part->part_size   = nwInf->_size;
+            Part->part_start  = batiSpot->StartByte;
+            Part->part_status = '0';
+            Part->part_type   = nwInf->_type[0];
+
+            BinWrite_Partition(Part,nwInf->_path,Disk);
+
+            printf("\n");
+            printf("FDISK SUCESS: Particion   -> %s <-   Creada Exitosamente por Primer Ajuste\n",nwInf->_name);
+            return;
+        }
+        cnt++;
+    }
+
+    if(batiSpot == NULL){
+        printf("\n");
+        printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+    }
+}
+
+void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
+
+    //(^< ............ ............ ............ Space Validation
+    DoublyGenericList* batchList = getBatchList_FromDisk(Disk);
+
+    if(Disk->disk_fit == 'f'){
+        FirstFit(batchList,nwInf,Disk);
+        return;
+    }
+
+    if(Disk->disk_fit == 'w'){
+        WorstFit(batchList,nwInf,Disk);
+        return;
+    }
+
+    if(Disk->disk_fit == 'b'){
+        BestFit(batchList,nwInf,Disk);
+        return;
+    }
 }
 
 
@@ -142,4 +201,4 @@ void rep_do(InfoCatcher* nwInf){
 
 }
 
-#endif // F1_CMD_H
+#endif // F1_DO_H
