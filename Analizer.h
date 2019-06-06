@@ -379,15 +379,15 @@ void f_disk_cmd(InfoCatcher* nwInf){
         return;
     }
 
-    if(Sum == 4){
-        printf("\n");
-        printf("FDISK ERROR: Ya Existen 4 Particiones Titulares\n");
-        return;
-    }
-
     if(nExtended == 0 && nwInf->_type[0] == 'l'){
         printf("\n");
         printf("FDISK ERROR: No Existe Particion Extendida para Crear Particion Logica\n");
+        return;
+    }
+
+    if(Sum == 4 && nwInf->_type[0] != 'l'){
+        printf("\n");
+        printf("FDISK ERROR: Ya Existen 4 Particiones Titulares\n");
         return;
     }
 

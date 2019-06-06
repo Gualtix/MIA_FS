@@ -105,6 +105,23 @@ MBR* LoadMBR(char* CompletePathDir){
     }
 }
 
+EBR* LoadEBR(char* CompletePathDir,int StartByte){
+
+    FILE* Fl = fopen(CompletePathDir,"rb+");
+
+    EBR* Bf = newEBR();
+
+    if(Fl){
+        fseek(Fl,StartByte,SEEK_SET);
+        fread(Bf,sizeof(EBR),1, Fl);
+        fclose(Fl);
+        return Bf;
+    }
+    else{
+        return NULL;
+    }
+}
+
 void UpdateMBR(char* CompltePathDir,MBR* Disk){
 
     FILE* Fl = fopen(CompltePathDir,"r+");
@@ -117,7 +134,33 @@ void UpdateMBR(char* CompltePathDir,MBR* Disk){
     }
 }
 
-DoublyGenericList* getBatchList_FromDisk(MBR* Disk){
+DoublyGenericList* getBatchList_FromExtended(EBR* DefaultEBR,int Ext_StartByte,int Ext_EndByte){
+
+    DoublyGenericList* batchList = new_DoublyGenericList();
+    Batch* Eb     = newBatch();
+    Eb->StartByte = Ext_StartByte;
+    Eb->Size      = sizeof(EBR);
+    Eb->EndByte   = Eb->StartByte + Eb->Size - 1; 
+    Eb->Type      = 'q';
+    Eb->PartName  = newString("EBR");
+    EnQueue(batchList,Eb);
+
+    int tmpEndByte = Eb->EndByte;
+
+
+    if(DefaultEBR->part_start == -1){
+        Batch* Sp     = newBatch();
+        Sp->StartByte = tmpEndByte + 1;
+        Sp->Size      = Ext_EndByte - sizeof(EBR);
+        Sp->EndByte   = Ext_EndByte; 
+        Sp->Type      = 's';
+        Sp->PartName  = newString("FreeSpace");
+        EnQueue(batchList,Sp);
+    }
+}
+
+
+DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
 
     DoublyGenericList* batchList = new_DoublyGenericList();
 
@@ -169,6 +212,13 @@ DoublyGenericList* getBatchList_FromDisk(MBR* Disk){
         Sp->Type      = Part.part_type;
         Sp->PartName  = newString(Part.part_name);
         tmpEndByte    = Sp->EndByte;
+        
+
+        if(Part.part_type == 'e'){
+            EBR* DefaultEBR = LoadEBR(CompletePathDir,Part.part_start);
+            Sp->LgParts = getBatchList_FromExtended(DefaultEBR,Sp->StartByte,Sp->EndByte);
+        }
+
         EnQueue(batchList,Sp);
         i++;
         
@@ -188,9 +238,19 @@ DoublyGenericList* getBatchList_FromDisk(MBR* Disk){
     return batchList; 
 }
 
-void BinWrite_Partition(Partition* Part,char* CompletePathDir,MBR* Disk){
+void BinWrite_EBR(Partition* Part,char* CompletePathDir,MBR* Disk){
     int index = MBRPartArray_GetAvailableIndex(Disk);
     Disk->mbr_partition[index] =  *Part;
+    
+    EBR* eB = newEBR();
+    FILE* Fl = fopen(CompletePathDir,"r+");
+
+    if(Fl){
+        fseek(Fl,Part->part_start,SEEK_SET);
+        fwrite(eB,sizeof(EBR),1,Fl);
+        fclose(Fl);
+    }
+
     UpdateMBR(CompletePathDir,Disk);
 }
 

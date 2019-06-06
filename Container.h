@@ -133,6 +133,7 @@ typedef struct Batch
     int   EndByte;
     char  Type;       
     char* PartName;
+    DoublyGenericList* LgParts;
 }Batch;
 
 Batch* newBatch(){
@@ -143,6 +144,7 @@ Batch* newBatch(){
     Bt->EndByte   = -1;
     Bt->Type      = '^';
     Bt->PartName  = NULL;
+    Bt->LgParts   = NULL;
 }
 
 

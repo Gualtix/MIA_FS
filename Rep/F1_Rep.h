@@ -7,7 +7,10 @@
 #include "../Belong.h"
 
 void AddBlock(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize){
-    fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\">\n");
+    if(GB->Type != 'e'){
+        fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\">\n");
+    }
+    
         fprintf(DotFl,"\t\t\t\t\t\t- %s -<br/>\n",BlockName);
         double PRC = ((double)GB->Size/DiskSize)*100;
         double BlockSize = GB->Size/1024;
@@ -15,6 +18,43 @@ void AddBlock(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize){
         fprintf(DotFl,"\t\t\t\t\t\t%.3f%% del Disco<br/>\n",PRC);
         fprintf(DotFl,"\t\t\t\t\t\tStartByte:%d<br/>\n",GB->StartByte);
         fprintf(DotFl,"\t\t\t\t\t\tEndByte:%d<br/>\n",GB->EndByte);
+    
+    if(GB->Type != 'e'){
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+    }
+}
+
+void AddExtended_Block(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize,int ColSpan){
+    
+    fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\">\n");
+
+        fprintf(DotFl,"\t\t\t\t\t\t<TABLE border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"0\">\n");
+        fprintf(DotFl,"\t\t\t\t\t\t\t<TR>\n");
+            fprintf(DotFl,"\t\t\t\t\t\t\t\t<TD colspan=\"%d\">\n",ColSpan);
+            AddBlock(DotFl,GB,BlockName,DiskSize);
+            fprintf(DotFl,"\t\t\t\t\t\t\t\t</TD>\n");
+        fprintf(DotFl,"\t\t\t\t\t\t\t</TR>\n");
+
+        fprintf(DotFl,"\t\t\t\t\t\t\t<TR>\n");
+            while(GB->LgParts->Length > 0){
+                Batch* tB = (Batch*)(DeQueue(GB->LgParts));
+                
+                
+                
+                if(tB->Type == 'q'){
+                    AddBlock(DotFl,tB,"EBR",DiskSize);
+                }
+                else if(tB->Type == 's'){
+                    AddBlock(DotFl,tB,"Space",DiskSize);
+                }
+                else{
+                    char* Nm = Concat_Izq_with_Der(newString("Extended: "),tB->PartName,'s','s');
+                    AddBlock(DotFl,tB,Nm,DiskSize);
+                }
+            }
+        fprintf(DotFl,"\t\t\t\t\t\t\t</TR>\n");
+
+    fprintf(DotFl,"\t\t\t\t\t\t</TABLE>\n");
     fprintf(DotFl,"\t\t\t\t\t</TD>\n");
 }
 
@@ -31,7 +71,7 @@ void AddBatch(FILE* DotFl,DoublyGenericList* btList,int DiskSize){
 
         if(Bt->Type == 'e'){
             char* Nm = Concat_Izq_with_Der(newString("Extended: "),Bt->PartName,'s','s');
-            AddBlock(DotFl,Bt,Nm,DiskSize);   
+            AddExtended_Block(DotFl,Bt,Nm,DiskSize,Bt->LgParts->Length);   
         }
 
         if(Bt->Type == 'm'){
@@ -69,7 +109,7 @@ void GenerateDiskRender(char* CompletePathDir,char* ReportPath,char* ReportName)
                     fprintf(DotFl,"\t\t\t<TABLE border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"0\">\n");
                         fprintf(DotFl,"\t\t\t\t<TR>\n");
                         //(^< ............ ............ ........... R E C O R R I D O
-                        DoublyGenericList* btList = getBatchList_FromDisk(Disk);
+                        DoublyGenericList* btList = getBatchList_FromDisk(CompletePathDir,Disk);
                         AddBatch(DotFl,btList,Disk->mbr_tamano);
                         
                         fprintf(DotFl,"\t\t\t\t</TR>\n");

@@ -139,8 +139,15 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
             Part->part_status = '0';
             Part->part_type   = nwInf->_type[0];
 
-            BinWrite_Partition(Part,nwInf->_path,Disk);
-
+            if(Part->part_type == 'e'){
+                BinWrite_EBR(Part,nwInf->_path,Disk);
+            }
+            if(Part->part_type == 'p'){
+                int index = MBRPartArray_GetAvailableIndex(Disk);
+                Disk->mbr_partition[index] =  *Part;
+                UpdateMBR(nwInf->_path,Disk);
+            }
+            
             printf("\n");
             printf("FDISK SUCESS: Particion   -> %s <-   Creada Exitosamente por Primer Ajuste\n",nwInf->_name);
             return;
@@ -156,8 +163,13 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
+    if(nwInf->_type[0] == 'l'){
+
+        return;
+    }
+
     //(^< ............ ............ ............ Space Validation
-    DoublyGenericList* batchList = getBatchList_FromDisk(Disk);
+    DoublyGenericList* batchList = getBatchList_FromDisk(nwInf->_path,Disk);
 
     if(Disk->disk_fit == 'f'){
         FirstFit(batchList,nwInf,Disk);
