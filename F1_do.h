@@ -116,9 +116,18 @@ void BestFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 }
 
+void BestFit_Logic(){
+
+}
+
 void WorstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 }
+
+void WorstFit_Logic(){
+    
+}
+
 
 void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
     int SpNeeded = nwInf->_size;
@@ -140,7 +149,16 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
             Part->part_type   = nwInf->_type[0];
 
             if(Part->part_type == 'e'){
-                BinWrite_EBR(Part,nwInf->_path,Disk);
+
+                int index = MBRPartArray_GetAvailableIndex(Disk);
+                Disk->mbr_partition[index] =  *Part;
+
+                UpdateMBR(nwInf->_path,Disk);
+
+                EBR* eB = newEBR();
+                eB->part_start = Part->part_start;
+                UpdateEBR(eB,nwInf->_path);
+
             }
             if(Part->part_type == 'p'){
                 int index = MBRPartArray_GetAvailableIndex(Disk);
@@ -155,33 +173,99 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
         cnt++;
     }
 
-    if(batiSpot == NULL){
+    //if(batiSpot == NULL){
         printf("\n");
         printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+    //}
+}
+
+void FirstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
+    Batch* ExtBatch = getExtended_Batch(batchList);
+
+    EBR* DefaultEBR = LoadEBR(nwInf->_path,ExtBatch->StartByte);
+    //ExtBatch->LgParts = getBatchList_FromExtended(DefaultEBR,nwInf->_path,ExtBatch->StartByte,ExtBatch->EndByte);
+
+    int SpNeeded = nwInf->_size;
+    int cnt = 0;
+    Batch* batiSpot = NULL;
+
+    while(cnt < ExtBatch->LgParts->Length){
+        batiSpot = (Batch*)(getNodebyIndex(ExtBatch->LgParts,cnt)->Dt);
+        if(SpNeeded <= batiSpot->Size && batiSpot->Type == 's'){
+
+            EBR* new_lgPart = newEBR();
+
+            if(DefaultEBR->part_size == -1){
+
+                new_lgPart->part_start = DefaultEBR->part_start;
+                new_lgPart->part_size = nwInf->_size;
+                new_lgPart->part_next = -1;
+                new_lgPart->part_status = '0';
+                strcpy(new_lgPart->part_name,nwInf->_name);
+                new_lgPart->part_fit = nwInf->_fit[0];
+                UpdateEBR(new_lgPart,nwInf->_path);
+
+            }
+            else{
+
+                EBR* prev_lgPart = LoadEBR(nwInf->_path,batiSpot->Prev);
+
+                new_lgPart->part_start = batiSpot->StartByte;
+                new_lgPart->part_size  = nwInf->_size;
+                new_lgPart->part_next  = batiSpot->Next;
+                new_lgPart->part_status = '0';
+                strcpy(new_lgPart->part_name,nwInf->_name);
+                new_lgPart->part_fit = nwInf->_fit[0];
+
+                prev_lgPart->part_next = new_lgPart->part_start;
+                new_lgPart->part_next  = batiSpot->Next;
+
+                UpdateEBR(prev_lgPart,nwInf->_path);
+                UpdateEBR(new_lgPart,nwInf->_path);
+                
+            }
+    
+            printf("\n");
+            printf("FDISK SUCESS: Particion Logica   -> %s <-   Creada Exitosamente por Primer Ajuste\n",nwInf->_name);
+            return;
+        }
+        cnt++;
     }
+
+    printf("\n");
+    printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+
 }
 
 void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
-
-    if(nwInf->_type[0] == 'l'){
-
-        return;
-    }
 
     //(^< ............ ............ ............ Space Validation
     DoublyGenericList* batchList = getBatchList_FromDisk(nwInf->_path,Disk);
 
     if(Disk->disk_fit == 'f'){
+
+        if(nwInf->_type[0] == 'l'){
+            FirstFit_Logic(batchList,nwInf,Disk);
+            return;
+        }
         FirstFit(batchList,nwInf,Disk);
         return;
     }
 
     if(Disk->disk_fit == 'w'){
+        if(nwInf->_type[0] == 'l'){
+            WorstFit_Logic();
+            return;
+        }
         WorstFit(batchList,nwInf,Disk);
         return;
     }
 
     if(Disk->disk_fit == 'b'){
+        if(nwInf->_type[0] == 'l'){
+            BestFit_Logic();
+            return;
+        }
         BestFit(batchList,nwInf,Disk);
         return;
     }

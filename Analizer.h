@@ -402,7 +402,7 @@ void f_disk_cmd(InfoCatcher* nwInf){
 
     
     //(^< ............ ............ ............ ............ ............ D O
-
+    int s = 0;
     fdisk_do(nwInf,Disk);
 
 }
