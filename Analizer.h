@@ -380,9 +380,11 @@ void f_disk_cmd(InfoCatcher* nwInf){
 
     //(^< ............ ............ ............ Delete
     if(nwInf->_delete != NULL){
+        int ssd = 5;
         Delete_Part(nwInf,Disk);
         return;
     }
+    //(^< ............ ............ ............
 
     int nPrimary  = MBRPartArray_PrimaryCounter(Disk);
     int nExtended = MBRPartArray_ExtendedCounter(Disk);
@@ -460,8 +462,8 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
     }
     else if(strcasecmp(Bf, "fdisk") == 0){
         f_disk_cmd(nwInf);
-        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
-        getchar();
+        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+        //getchar();
         return 0;
     }
     else if(strcasecmp(Bf, "rep") == 0){
@@ -477,7 +479,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     else if(strcasecmp(Bf, "pause") == 0){
-        getchar();
+        //getchar();
         return 0;
     }
     return 1;

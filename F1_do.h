@@ -110,92 +110,173 @@ void rmdisk_do(InfoCatcher* nwInf){
 //(^< ............ ............ ............ ............ ............ F D I S K
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-void BestFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 
+void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
 
     
-}
+    Batch* Prt = getBatch_By_PartName(nwInf->_path,Disk,nwInf->_name);
+    if(Prt == NULL){
+        printf("\n");
+        printf("FDISK ERROR: La Particion   -> %s <-   No Existe\n",nwInf->_name);
+        getchar();
+        return;
+    }
 
-void BestFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
+    int Op = DeleteAsk(nwInf->_name);
+    if(Op == 0){
+        return;
+    }
 
-}
+    if(strcasecmp(nwInf->_delete,"fast") == 0 || strcasecmp(nwInf->_delete,"full") == 0){
 
-void WorstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
+        if(Prt->Type == 'p' || Prt->Type == 'e'){
+            int index = MBRPartArray_GetIndex_By_PartName(Disk,Prt->PartName);
+            Disk->mbr_partition[index] = *(newPartition());
 
-}
+            Ascending_MBRPartArray_BubbleSort(Disk);
+            UpdateMBR(nwInf->_path,Disk);
+        }
 
-void WorstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
-    
-}
+        if(Prt->Type == 'q'){
 
-void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
-    int SpNeeded = nwInf->_size;
-    int cnt = 0;
-    Batch* batiSpot = NULL;
-
-    while(cnt < batchList->Length){
-        batiSpot = (Batch*)(getNodebyIndex(batchList,cnt)->Dt);
-        if(SpNeeded <= batiSpot->Size && batiSpot->Type == 's'){
-            Partition* Part = newPartition();
-
-            Part->part_fit[0] = nwInf->_fit[0];
-            Part->part_fit[1] = nwInf->_fit[1];
-
-            strcpy(Part->part_name,newString(nwInf->_name));
-            Part->part_size   = nwInf->_size;
-            Part->part_start  = batiSpot->StartByte;
-            Part->part_status = '0';
-            Part->part_type   = nwInf->_type[0];
-
-            if(Part->part_type == 'e'){
-
-                int index = MBRPartArray_GetAvailableIndex(Disk);
-                Disk->mbr_partition[index] =  *Part;
-
-                Ascending_MBRPartArray_BubbleSort(Disk);
-                UpdateMBR(nwInf->_path,Disk);
-
-                EBR* eB = newEBR();
-                eB->part_start = Part->part_start;
-                UpdateEBR(eB,nwInf->_path);
-
+            if(Prt->Prev > -1){
+                EBR* Prev = LoadEBR(nwInf->_path,Prt->Prev);
+                Prev->part_next = Prt->Next;
+                UpdateEBR(Prev,nwInf->_path);
             }
-            if(Part->part_type == 'p'){
-                int index = MBRPartArray_GetAvailableIndex(Disk);
-                Disk->mbr_partition[index] =  *Part;
-                Ascending_MBRPartArray_BubbleSort(Disk);
-                UpdateMBR(nwInf->_path,Disk);
+            else{
+                EBR* DefaultEBR = LoadEBR(nwInf->_path,Prt->StartByte);
+                DefaultEBR->part_fit = '^';
+                DefaultEBR->part_size = sizeof(EBR);
+                DefaultEBR->part_status = '^';
+                memset(DefaultEBR->part_name,'\0',16);
+                strcpy(DefaultEBR->part_name,"UNDEFINED");
+                UpdateEBR(DefaultEBR,nwInf->_path);
             }
-            
+        }
+
+        if(strcasecmp(nwInf->_delete,"fast") == 0){
             printf("\n");
-            printf("FDISK SUCESS: Particion   -> %s <-   Creada Exitosamente por Primer Ajuste\n",nwInf->_name);
+            printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Fast Delete\n",nwInf->_name);
+            getchar();
             return;
         }
-        cnt++;
+
+    }
+    if(strcasecmp(nwInf->_delete,"full") == 0){
+        printf("\n");
+        printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
+        getchar();
+        return;
     }
 
     printf("\n");
-    printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+    printf("FDISK ERROR: Parametro -delete:   -> %s <-   No Valido\n",nwInf->_name);
+    printf("FDISK WARNING: Operacion Eliminar Particion Cancelada\n" );
+    getchar();
+    return;
 }
 
-void FirstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
-    Batch* ExtBatch = getExtended_Batch(batchList);
+void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
-    EBR* DefaultEBR = LoadEBR(nwInf->_path,ExtBatch->StartByte);
-    //ExtBatch->LgParts = getBatchList_FromExtended(DefaultEBR,nwInf->_path,ExtBatch->StartByte,ExtBatch->EndByte);
+    if(strcasecmp(nwInf->_name,"wiwis") == 0){
+        int kssf = 53;
 
-    int SpNeeded = nwInf->_size;
-    int cnt = 0;
-    Batch* batiSpot = NULL;
+    }
 
-    while(cnt < ExtBatch->LgParts->Length){
-        batiSpot = (Batch*)(getNodebyIndex(ExtBatch->LgParts,cnt)->Dt);
-        if(SpNeeded <= batiSpot->Size && batiSpot->Type == 's'){
+    //(^< ............ ............ ............ Space Validation
+    DoublyGenericList* batchList = getBatchList_FromDisk(nwInf->_path,Disk);
 
-            EBR* new_lgPart = newEBR();
+    char* FType =  newString("Primer Ajuste");
 
-            if(DefaultEBR->part_size == -1){
+    if(Disk->disk_fit == 'f'){
+        Isolate_SpaceBatch(batchList);
+    }
+
+    if(Disk->disk_fit == 'b'){
+        get_Ascending_BatchSpace_List(batchList);
+        FType = newString("Mejor Ajuste");
+    }
+
+    if(Disk->disk_fit == 'w'){
+        get_Descending_BatchSpace_List(batchList);
+        FType = newString("Peor Ajuste");
+    }
+
+    //(^< ............ ............ ............ Regular
+    if(nwInf->_type[0] != 'l'){
+
+        Batch* tmp = get_First_SpaceBatch_That_Fits(batchList,nwInf->_size);
+        if(tmp == NULL){
+            printf("\n");
+            printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+            return;
+        }
+
+        int index = MBRPartArray_GetAvailableIndex(Disk);
+
+        Partition* Part = newPartition();
+
+        strcpy(Part->part_name,nwInf->_name);
+        strcpy(Part->part_fit,nwInf->_fit);
+        Part->part_type = nwInf->_type[0];
+        Part->part_size = nwInf->_size;
+        Part->part_start = tmp->StartByte;
+        Part->part_status = '0';
+
+        Disk->mbr_partition[index] = *Part;
+
+        if(Part->part_type == 'e'){
+            EBR* eB = newEBR();
+            eB->part_start = Part->part_start;
+            UpdateEBR(eB,nwInf->_path);
+        }
+
+        Ascending_MBRPartArray_BubbleSort(Disk);
+        UpdateMBR(nwInf->_path,Disk);
+
+        printf("\n");
+        printf("FDISK SUCESS: Particion   -> %s <-   Creada Exitosamente por %s\n",nwInf->_name,FType);
+        return;
+        
+    }
+    //(^< ............ ............ ............ Logic
+    else{
+        int see = 866;
+        Batch* ext = getExtended_Batch(batchList);
+        Batch* tmp = get_First_SpaceBatch_That_Fits(ext->LgParts,nwInf->_size);
+        if(tmp == NULL){
+            printf("\n");
+            printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
+            return;
+        }
+
+        EBR* DefaultEBR = LoadEBR(nwInf->_path,ext->StartByte);
+        
+        EBR* new_lgPart = newEBR();
+
+        
+        //if(DefaultEBR->part_start == tmp->Prev && strcasecmp(DefaultEBR->part_name,"UNDEFINED") == 0){
+        if(strcasecmp(DefaultEBR->part_name,"UNDEFINED") == 0 && DefaultEBR->part_next > -1){
+
+            new_lgPart->part_start = ext->StartByte;
+            new_lgPart->part_size  = nwInf->_size;
+            new_lgPart->part_next  = tmp->Next;
+            new_lgPart->part_status = '0';
+            strcpy(new_lgPart->part_name,nwInf->_name);
+            new_lgPart->part_fit = nwInf->_fit[0];
+            UpdateEBR(new_lgPart,nwInf->_path);
+
+            GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+
+            printf("\n");
+            printf("FDISK SUCESS: Particion Logica   -> %s <-   Creada Exitosamente por %s\n",nwInf->_name,FType);
+            return;
+        }
+    
+
+        if(DefaultEBR->part_size == -1){
 
                 new_lgPart->part_start = DefaultEBR->part_start;
                 new_lgPart->part_size = nwInf->_size;
@@ -208,156 +289,39 @@ void FirstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
             }
             else{
 
-                EBR* prev_lgPart = LoadEBR(nwInf->_path,batiSpot->Prev);
+                EBR* prev_lgPart = LoadEBR(nwInf->_path,tmp->Prev);
 
-                new_lgPart->part_start = batiSpot->StartByte;
+                new_lgPart->part_start = tmp->StartByte;
                 new_lgPart->part_size  = nwInf->_size;
-                new_lgPart->part_next  = batiSpot->Next;
+                new_lgPart->part_next  = tmp->Next;
                 new_lgPart->part_status = '0';
                 strcpy(new_lgPart->part_name,nwInf->_name);
                 new_lgPart->part_fit = nwInf->_fit[0];
 
                 prev_lgPart->part_next = new_lgPart->part_start;
-                new_lgPart->part_next  = batiSpot->Next;
+                new_lgPart->part_next  = tmp->Next;
 
                 UpdateEBR(prev_lgPart,nwInf->_path);
                 UpdateEBR(new_lgPart,nwInf->_path);
+
+                
+                /*
+                if(strcasecmp(nwInf->_name,"Part15") == 0){
+                    GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+                }
+
+                int asdf = 86;
+                int afsdf = 8547;
+
+                MBR* uus = LoadMBR(nwInf->_path);
+                int afeesdf = 8547;
+                */
                 
             }
     
             printf("\n");
-            printf("FDISK SUCESS: Particion Logica   -> %s <-   Creada Exitosamente por Primer Ajuste\n",nwInf->_name);
+            printf("FDISK SUCESS: Particion Logica   -> %s <-   Creada Exitosamente por %s\n",nwInf->_name,FType);
             return;
-        }
-        cnt++;
-    }
-
-    printf("\n");
-    printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
-
-}
-
-void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
-
-    printf("\n");
-    printf("FDISK WARNING: Esta seguro de Eliminar la Particion   -> %s <-   ?\n",nwInf->_name);
-    printf("Y = Yes , Any Other Key = No \n");
-
-    /*
-    char Op;
-    Op = getchar();
-    if(Op =='\n' || Op =='\r'){
-        Op = getchar();
-    }
-
-    if(putchar(tolower(Op)) != 'y' ){
-        printf("\n");
-        printf("FDISK WARNING: Operacion Eliminar Particion Cancelada\n" );
-        Op = getchar();
-        return;
-    }
-    */
-
-    int index = MBRPartArray_GetIndex_By_PartName(Disk,nwInf->_name);
-
-    if(index == -1){
-
-        Batch* Prt = getBatch_By_PartName(nwInf->_path,Disk,nwInf->_name);
-        if(Prt == NULL){
-            printf("\n");
-            printf("FDISK ERROR: La Particion   -> %s <-   No Existe\n",nwInf->_name);
-            getchar();
-            return;
-        }
-        else{
-            //(^< ............ ............ ............ Delete Logic
-            if(Prt->Prev > 0){
-                EBR* Prev = LoadEBR(nwInf->_path,Prt->Prev);    
-                Prev->part_next = Prt->Next;
-                UpdateEBR(Prev,nwInf->_path);
-                if(strcasecmp(nwInf->_delete,"full") == 0){
-                    Part_1024_Erase(nwInf->_path,Prt->StartByte,Prt->Size);
-                    printf("\n");
-                    printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
-
-
-                    /*
-                    if(strcasecmp(nwInf->_name,"Part14") == 0){
-                        GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
-                        DoublyGenericList* ls = getBatchList_FromDisk(nwInf->_path,Disk);
-                        int s = 5;
-
-                        get_Descending_BatchSpace_List(ls);
-                        //Isolate_SpaceBatch(ls);
-
-                        ls = ((Batch*)(getNodebyIndex(ls,0)->Dt))->LgParts;
-                        
-                        while(ls->Length > 0){
-                            Batch* bt = (Batch*)(DeQueue(ls));
-                            int aa = bt->Size/1024;
-                            printf("%d\n",aa);
-                        }
-                    }
-                    */
-
-                    getchar();
-                    return;
-                }
-            }
-        }
-    }
-    else{
-        int tmpStartByte = Disk->mbr_partition[index].part_start;
-        int tmpPartSize  = Disk->mbr_partition[index].part_size;
-
-        Disk->mbr_partition[index] = *newPartition();
-        Ascending_MBRPartArray_BubbleSort(Disk);
-        UpdateMBR(nwInf->_path,Disk);
-        if(strcasecmp(nwInf->_delete,"full") == 0){
-            Part_1024_Erase(nwInf->_path,tmpStartByte,tmpPartSize);
-            printf("\n");
-            printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
-            getchar();
-            return;
-        }
-    }
-
-    printf("\n");
-    printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Fast Delete\n",nwInf->_name); 
-    getchar();   
-}
-
-void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
-
-    //(^< ............ ............ ............ Space Validation
-    DoublyGenericList* batchList = getBatchList_FromDisk(nwInf->_path,Disk);
-
-    if(Disk->disk_fit == 'f'){
-
-        if(nwInf->_type[0] == 'l'){
-            FirstFit_Logic(batchList,nwInf,Disk);
-            return;
-        }
-        FirstFit(batchList,nwInf,Disk);
-        return;
-    }
-
-    if(Disk->disk_fit == 'w'){
-        if(nwInf->_type[0] == 'l'){
-            //WorstFit_Logic();
-            return;
-        }
-        WorstFit(batchList,nwInf,Disk);
-        return;
-    }
-
-    if(Disk->disk_fit == 'b'){
-        if(nwInf->_type[0] == 'l'){
-            //BestFit_Logic();
-            return;
-        }
-        BestFit(batchList,nwInf,Disk);
-        return;
     }
 }
 

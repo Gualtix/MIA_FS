@@ -230,7 +230,13 @@ DoublyGenericList* getBatchList_FromExtended(EBR* DefaultEBR,char* CompletePathD
                 _startByte = _endByte + 1;
                 _size      = space;
                 _endByte   = (_next - 1);
-                eB         = Set_Batch(_startByte,_size,_endByte,'s',"FreeSpace",_prev,_next);
+                if(CurrentEBR->part_next > -1){
+                    eB         = Set_Batch(_startByte,_size,_endByte,'s',"FreeSpace",CurrentEBR->part_start,_next);
+                }
+                else{
+                    eB         = Set_Batch(_startByte,_size,_endByte,'s',"FreeSpace",_prev,_next);
+                }
+                
                 EnQueue(EBR_List,eB);
             }
 
@@ -259,7 +265,7 @@ DoublyGenericList* getBatchList_FromExtended(EBR* DefaultEBR,char* CompletePathD
    return EBR_List;
 }
 
-DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
+    DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
 
     
     DoublyGenericList* batchList = new_DoublyGenericList();
@@ -377,6 +383,8 @@ Batch* getBatch_By_PartName(char* CompletePahtDir,MBR* Disk,char* PartName){
 }
 
 void Part_1024_Erase(char* CompletePathDir,int StartByte,int PartSize){
+    
+
     char* Bf = newString(1024);
     int Times = PartSize / 1024;
     
@@ -526,6 +534,39 @@ void get_Descending_BatchSpace_List(DoublyGenericList* btList){
     if(ext_SpaceList != NULL){
         Descending_Bubble_to_SpaceList(ext_SpaceList);
     } 
+}
+
+Batch* get_First_SpaceBatch_That_Fits(DoublyGenericList* btList,int RqSpace){
+    int cnt = 0;
+    while (cnt < btList->Length){
+        Batch* tmp = (Batch*)(getNodebyIndex(btList,cnt)->Dt);
+        if(tmp->Size >= RqSpace && tmp->Type == 's'){
+            return tmp;
+        }
+        cnt++;
+    }
+    return NULL;
+}
+
+int DeleteAsk(char* Nm){
+    printf("\n");
+    printf("FDISK WARNING: Esta seguro de Eliminar la Particion   -> %s <-   ?\n",Nm);
+    printf("Y = Yes , Any Other Key = No \n");
+
+    char Op;
+    Op = getchar();
+
+    if(Op =='\n' || Op =='\r'){
+        Op = getchar();
+    }
+    if(putchar(tolower(Op)) != 'y' ){
+        printf("\n");
+        printf("FDISK WARNING: Operacion Eliminar Particion Cancelada\n" );
+        Op = getchar();
+        return 0;
+    }
+
+    return 1;
 }
 
 

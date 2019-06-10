@@ -103,7 +103,6 @@ void AddExtended_Block(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize,int Co
                         char* Ps = tB->PartName;
                         Add_LogicPart_Block(DotFl,Lg,Ps,DiskSize);
                     }
-                    
                 }
                 else if(tB->Type == 's'){
                     AddBlock(DotFl,tB,"Space",DiskSize);
