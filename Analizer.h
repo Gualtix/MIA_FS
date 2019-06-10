@@ -460,7 +460,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
     }
     else if(strcasecmp(Bf, "fdisk") == 0){
         f_disk_cmd(nwInf);
-        GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
         getchar();
         return 0;
     }

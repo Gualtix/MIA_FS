@@ -92,8 +92,6 @@ int MBRPartArray_GetIndex_By_PartName(MBR* Bf,char* PartName){
     return -1;
 }
 
-
-
 int MBRPartArray_PartNameExists(MBR* Bf,char* PartName){
     int cnt = 0;
     while (cnt < 4) {
@@ -395,6 +393,140 @@ void Part_1024_Erase(char* CompletePathDir,int StartByte,int PartSize){
     }
 }
 
+void Isolate_SpaceBatch(DoublyGenericList* btList){
+    int i = 0;
+    while(i < btList->Length){
+        Batch* tmp = (Batch*)(getNodebyIndex(btList,i)->Dt);
+
+        if(tmp->Type == 'e'){
+
+            int j = 0;
+            while(j < tmp->LgParts->Length){
+                Batch* xp = (Batch*)(getNodebyIndex(tmp->LgParts,j)->Dt);
+                if(xp->Type != 's'){
+                    SpecificRemove(tmp->LgParts,j);
+                    continue;
+                }
+                else{
+                    j++;
+                }
+            }
+        }
+
+        if(tmp->Type != 's' && tmp->Type != 'e'){
+            SpecificRemove(btList,i);
+            continue;
+        }
+        else{
+            i++;
+        }
+    }
+
+}
+
+void Ascending_Bubble_to_SpaceList(DoublyGenericList* SpaceList){
+
+    int lSize = SpaceList->Length;
+    int i = 0;
+    while (i < lSize) {
+        int j = 0;
+        while (j < (lSize - (i + 1))) {
+            Batch* tmp_iz = (Batch*)(getNodebyIndex(SpaceList,j)->Dt);
+            Batch* tmp_der = (Batch*)(getNodebyIndex(SpaceList,j + 1)->Dt);
+
+            int izval = (tmp_iz->Size)/1024;
+            int derval = (tmp_der->Size)/1024;
+            if(tmp_iz->Size > tmp_der->Size){
+                Batch* swap = newBatch();
+                *swap    = *tmp_iz;
+                *tmp_iz  = *tmp_der;      
+                *tmp_der = *swap;
+
+                int sval = (swap->Size/1024);
+                izval  = (tmp_iz->Size)/1024;
+                derval = (tmp_der->Size)/1024;
+            }
+            j++;
+        }
+        i++;
+    }
+}
+
+void Descending_Bubble_to_SpaceList(DoublyGenericList* SpaceList){
+    int lSize = SpaceList->Length;
+    int i = 0;
+    while (i < lSize) {
+        int j = 0;
+        while (j < (lSize - (i + 1))) {
+            Batch* tmp_iz = (Batch*)(getNodebyIndex(SpaceList,j)->Dt);
+            Batch* tmp_der = (Batch*)(getNodebyIndex(SpaceList,j + 1)->Dt);
+
+            int izval = (tmp_iz->Size)/1024;
+            int derval = (tmp_der->Size)/1024;
+            if(tmp_iz->Size < tmp_der->Size){
+                Batch* swap = newBatch();
+                *swap    = *tmp_iz;
+                *tmp_iz  = *tmp_der;      
+                *tmp_der = *swap;
+
+                int sval = (swap->Size/1024);
+                izval  = (tmp_iz->Size)/1024;
+                derval = (tmp_der->Size)/1024;
+            }
+            j++;
+        }
+        i++;
+    }
+}
+
+void get_Ascending_BatchSpace_List(DoublyGenericList* btList){
+
+    Isolate_SpaceBatch(btList);
+
+    DoublyGenericList* SpaceList     = btList;
+    DoublyGenericList* ext_SpaceList = NULL;
+
+    int i = 0;
+    while(i < SpaceList->Length){
+        Batch* tmp = (Batch*)(getNodebyIndex(btList,i)->Dt);
+        if(tmp->Type == 'e'){
+            ext_SpaceList = tmp->LgParts;
+        }
+        i++;
+    }
+
+    if(SpaceList != NULL){
+        Ascending_Bubble_to_SpaceList(SpaceList);
+    }
+
+    if(ext_SpaceList != NULL){
+        Ascending_Bubble_to_SpaceList(ext_SpaceList);
+    }  
+}
+
+void get_Descending_BatchSpace_List(DoublyGenericList* btList){
+    Isolate_SpaceBatch(btList);
+
+    DoublyGenericList* SpaceList     = btList;
+    DoublyGenericList* ext_SpaceList = NULL;
+
+    int i = 0;
+    while(i < SpaceList->Length){
+        Batch* tmp = (Batch*)(getNodebyIndex(btList,i)->Dt);
+        if(tmp->Type == 'e'){
+            ext_SpaceList = tmp->LgParts;
+        }
+        i++;
+    }
+
+    if(SpaceList != NULL){
+        Descending_Bubble_to_SpaceList(SpaceList);
+    }
+
+    if(ext_SpaceList != NULL){
+        Descending_Bubble_to_SpaceList(ext_SpaceList);
+    } 
+}
 
 
 

@@ -4,6 +4,7 @@
 #include "Container.h"
 #include "Fw/Helper.h"
 #include "Belong.h"
+#include "Rep/F1_Rep.h"
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ M K D I S K
@@ -54,8 +55,6 @@ void SetMBR_to_Disk(char* CompletePathDir,int DiskSize,char Unit,char Fit){
         fclose(Fl);
     }
 }
-
-
 
 void mkdisk_do(InfoCatcher* nwInf){
 
@@ -111,12 +110,14 @@ void rmdisk_do(InfoCatcher* nwInf){
 //(^< ............ ............ ............ ............ ............ F D I S K
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-
 void BestFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
+
+
+    
 }
 
-void BestFit_Logic(){
+void BestFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 }
 
@@ -124,10 +125,9 @@ void WorstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
 
 }
 
-void WorstFit_Logic(){
+void WorstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
     
 }
-
 
 void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
     int SpNeeded = nwInf->_size;
@@ -243,6 +243,7 @@ void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
     printf("FDISK WARNING: Esta seguro de Eliminar la Particion   -> %s <-   ?\n",nwInf->_name);
     printf("Y = Yes , Any Other Key = No \n");
 
+    /*
     char Op;
     Op = getchar();
     if(Op =='\n' || Op =='\r'){
@@ -255,6 +256,7 @@ void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
         Op = getchar();
         return;
     }
+    */
 
     int index = MBRPartArray_GetIndex_By_PartName(Disk,nwInf->_name);
 
@@ -277,6 +279,27 @@ void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
                     Part_1024_Erase(nwInf->_path,Prt->StartByte,Prt->Size);
                     printf("\n");
                     printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
+
+
+                    /*
+                    if(strcasecmp(nwInf->_name,"Part14") == 0){
+                        GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
+                        DoublyGenericList* ls = getBatchList_FromDisk(nwInf->_path,Disk);
+                        int s = 5;
+
+                        get_Descending_BatchSpace_List(ls);
+                        //Isolate_SpaceBatch(ls);
+
+                        ls = ((Batch*)(getNodebyIndex(ls,0)->Dt))->LgParts;
+                        
+                        while(ls->Length > 0){
+                            Batch* bt = (Batch*)(DeQueue(ls));
+                            int aa = bt->Size/1024;
+                            printf("%d\n",aa);
+                        }
+                    }
+                    */
+
                     getchar();
                     return;
                 }
@@ -294,14 +317,14 @@ void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
             Part_1024_Erase(nwInf->_path,tmpStartByte,tmpPartSize);
             printf("\n");
             printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
-            Op = getchar();
+            getchar();
             return;
         }
     }
 
     printf("\n");
     printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Fast Delete\n",nwInf->_name); 
-    Op = getchar();   
+    getchar();   
 }
 
 void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
@@ -321,7 +344,7 @@ void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
     if(Disk->disk_fit == 'w'){
         if(nwInf->_type[0] == 'l'){
-            WorstFit_Logic();
+            //WorstFit_Logic();
             return;
         }
         WorstFit(batchList,nwInf,Disk);
@@ -330,7 +353,7 @@ void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
     if(Disk->disk_fit == 'b'){
         if(nwInf->_type[0] == 'l'){
-            BestFit_Logic();
+            //BestFit_Logic();
             return;
         }
         BestFit(batchList,nwInf,Disk);
