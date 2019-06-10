@@ -64,7 +64,7 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         }
 
         //(^< ............ ............ ............   _delete
-        if(strcmp(Prm_Izq,"_delete") == 0){
+        if(strcmp(Prm_Izq,"-delete") == 0){
             (*nwInf)->_delete = newString(Prm_Der);
             continue;
         }
@@ -207,6 +207,8 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         }
         */
     }
+
+
     
 }
 
@@ -347,15 +349,22 @@ void f_disk_cmd(InfoCatcher* nwInf){
 
     //(^< ............ ............ ............ Default
     if(nwInf->_unit == NULL){
-        nwInf->_unit[0] = 'k';
+        nwInf->_unit = newString("k");
     }
 
     if(nwInf->_type == NULL){
-        nwInf->_type[0] = 'p';
+        nwInf->_type = newString("p");
     }
 
     if(nwInf->_fit == NULL){
         nwInf->_fit = newString("wf");
+    }
+
+    if(nwInf->_unit[0] == 'k'){
+        nwInf->_size = nwInf->_size * 1024;
+    }
+    else{
+        nwInf->_size = nwInf->_size * 1024 * 1024;
     }
 
     //(^< ............ ............ ............
@@ -368,7 +377,14 @@ void f_disk_cmd(InfoCatcher* nwInf){
         printf("FDISK ERROR: Disco No Encontrado\n");
         return;
     }
-    int nPrimary = MBRPartArray_PrimaryCounter(Disk);
+
+    //(^< ............ ............ ............ Delete
+    if(nwInf->_delete != NULL){
+        Delete_Part(nwInf,Disk);
+        return;
+    }
+
+    int nPrimary  = MBRPartArray_PrimaryCounter(Disk);
     int nExtended = MBRPartArray_ExtendedCounter(Disk);
 
     int Sum = nPrimary + nExtended;
@@ -391,8 +407,10 @@ void f_disk_cmd(InfoCatcher* nwInf){
         return;
     }
 
-    int NameExists = MBRPartArray_PartNameExists(Disk,nwInf->_name);
-    if(NameExists == 1){
+    //int NameExists = MBRPartArray_PartNameExists(Disk,nwInf->_name);
+    Batch* Nm = getBatch_By_PartName(nwInf->_path,Disk,nwInf->_name);
+            
+    if(Nm != NULL){
         printf("\n");
         printf("FDISK ERROR: El Nombre de la Particion   -> %s <-   ya Existe\n",nwInf->_name);
         return;
@@ -402,7 +420,7 @@ void f_disk_cmd(InfoCatcher* nwInf){
 
     
     //(^< ............ ............ ............ ............ ............ D O
-    int s = 0;
+    
     fdisk_do(nwInf,Disk);
 
 }

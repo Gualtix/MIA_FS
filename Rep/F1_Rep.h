@@ -25,9 +25,9 @@ void AddBlock(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize){
     
         fprintf(DotFl,"\t\t\t\t\t\t- %s -<br/>\n",BlockName);
         double PRC = ((double)GB->Size/DiskSize)*100;
-        double BlockSize = GB->Size/1024;
-        fprintf(DotFl,"\t\t\t\t\t\t%.3f (Kb)<br/>\n",BlockSize);
-        fprintf(DotFl,"\t\t\t\t\t\t%.3f%% del Disco<br/>\n",PRC);
+        int BlockSize = GB->Size/1024;
+        fprintf(DotFl,"\t\t\t\t\t\t %d (Kb)<br/>\n",BlockSize);
+        fprintf(DotFl,"\t\t\t\t\t\t%.2f%% del Disco<br/>\n",PRC);
         fprintf(DotFl,"\t\t\t\t\t\tStartByte:%d<br/>\n",GB->StartByte);
         fprintf(DotFl,"\t\t\t\t\t\tEndByte:%d<br/>\n",GB->EndByte);
     
@@ -58,9 +58,9 @@ void Add_LogicPart_Block(FILE* DotFl,Batch* GB,char* BlockName,int DiskSize){
         fprintf(DotFl,"\t\t\t\t\t\t- Logic -<br/>\n");
         fprintf(DotFl,"\t\t\t\t\t\t %s <br/>\n",BlockName);
         double PRC = ((double)GB->Size/DiskSize)*100;
-        int BlockSize = GB->Size;
+        int BlockSize = GB->Size / 1024;
         fprintf(DotFl,"\t\t\t\t\t\t %d (Bytes)<br/>\n",BlockSize);
-        fprintf(DotFl,"\t\t\t\t\t\t%.3f%% del Disco<br/>\n",PRC);
+        fprintf(DotFl,"\t\t\t\t\t\t%.2f%% del Disco<br/>\n",PRC);
         fprintf(DotFl,"\t\t\t\t\t\tStartByte:%d<br/>\n",GB->StartByte);
         fprintf(DotFl,"\t\t\t\t\t\tEndByte:%d<br/>\n",GB->EndByte);
     

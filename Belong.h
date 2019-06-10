@@ -4,9 +4,6 @@
 #include "Container.h"
 #include "Fw/Helper.h"
 
-
-
-
 int MBRPartArray_ExtendedCounter(MBR* Bf){
     int cnt = 0;
     int i  = 0;
@@ -31,8 +28,17 @@ int MBRPartArray_PrimaryCounter(MBR* Bf){
     return i;
 }
 
+MBR* Ascending_MBRPartArray_BubbleSort(MBR* Bf){
+    
+    int f = 0;
+    while(f < 4){
+        int Rs = (Bf->mbr_partition[f].part_start == (-1));
+        if(Rs == 1){
+            Bf->mbr_partition[f].part_start = Bf->mbr_tamano; 
+        }
+        f++;
+    }
 
-MBR* MBRPartArray_BubbleSort(MBR* Bf){
     int i = 0;
     while (i < 4) {
         int j = 0;
@@ -46,6 +52,18 @@ MBR* MBRPartArray_BubbleSort(MBR* Bf){
         }
         i++;
     }
+
+    f = 0;
+    while(f < 4){
+        int Rs = (Bf->mbr_partition[f].part_start == (Bf->mbr_tamano));
+        if(Rs == 1){
+            Bf->mbr_partition[f].part_start = (-1); 
+        }
+        f++;
+    }
+
+    int asd = 0;
+    int asde = 0;
     return Bf;
 }
 
@@ -73,6 +91,8 @@ int MBRPartArray_GetIndex_By_PartName(MBR* Bf,char* PartName){
     }
     return -1;
 }
+
+
 
 int MBRPartArray_PartNameExists(MBR* Bf,char* PartName){
     int cnt = 0;
@@ -121,8 +141,6 @@ EBR* LoadEBR(char* CompletePathDir,int StartByte){
         return NULL;
     }
 }
-
-
 
 void UpdateMBR(char* CompltePathDir,MBR* Disk){
 
@@ -243,7 +261,6 @@ DoublyGenericList* getBatchList_FromExtended(EBR* DefaultEBR,char* CompletePathD
    return EBR_List;
 }
 
-
 DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
 
     
@@ -323,8 +340,6 @@ DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
     return batchList; 
 }
 
-
-
 Batch* getExtended_Batch(DoublyGenericList* BtList){
     int cnt = 0;
     while (cnt < BtList->Length){
@@ -337,12 +352,47 @@ Batch* getExtended_Batch(DoublyGenericList* BtList){
     return NULL;
 }
 
-void Ascend_BubbleSort_BatchList(DoublyGenericList* btList){
+Batch* getBatch_By_PartName(char* CompletePahtDir,MBR* Disk,char* PartName){
+    
+    int eek = 7;
+    DoublyGenericList* btList = getBatchList_FromDisk(CompletePahtDir,Disk);
 
+    while (btList->Length > 0){
+
+        Batch* tmp = (Batch*)(DeQueue(btList));
+
+        if(tmp->Type == 'e'){
+            while(tmp->LgParts->Length > 0){
+                Batch* inn = (Batch*)(DeQueue(tmp->LgParts));
+                if(strcasecmp(PartName,inn->PartName) == 0){
+                    return inn;
+                }
+            }    
+        }
+
+        if(strcasecmp(PartName,tmp->PartName) == 0){
+            return tmp;
+        }
+    }
+    
+    return NULL;
 }
 
-void Desend_BubbleSort_BatchList(DoublyGenericList* btList){
+void Part_1024_Erase(char* CompletePathDir,int StartByte,int PartSize){
+    char* Bf = newString(1024);
+    int Times = PartSize / 1024;
     
+    FILE* Fl = fopen(CompletePathDir,"r+");
+    if(Fl){
+        
+        int cnt = 0;
+        while(cnt < Times){
+            fseek(Fl,StartByte + (1024 * cnt),SEEK_SET);
+            fwrite(Bf,1024,1,Fl);
+            cnt++;
+        }
+        fclose(Fl);
+    }
 }
 
 

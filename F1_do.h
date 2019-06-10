@@ -153,6 +153,7 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
                 int index = MBRPartArray_GetAvailableIndex(Disk);
                 Disk->mbr_partition[index] =  *Part;
 
+                Ascending_MBRPartArray_BubbleSort(Disk);
                 UpdateMBR(nwInf->_path,Disk);
 
                 EBR* eB = newEBR();
@@ -163,6 +164,7 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
             if(Part->part_type == 'p'){
                 int index = MBRPartArray_GetAvailableIndex(Disk);
                 Disk->mbr_partition[index] =  *Part;
+                Ascending_MBRPartArray_BubbleSort(Disk);
                 UpdateMBR(nwInf->_path,Disk);
             }
             
@@ -173,10 +175,8 @@ void FirstFit(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
         cnt++;
     }
 
-    //if(batiSpot == NULL){
-        printf("\n");
-        printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
-    //}
+    printf("\n");
+    printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
 }
 
 void FirstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
@@ -235,6 +235,73 @@ void FirstFit_Logic(DoublyGenericList* batchList,InfoCatcher* nwInf,MBR* Disk){
     printf("\n");
     printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
 
+}
+
+void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
+
+    printf("\n");
+    printf("FDISK WARNING: Esta seguro de Eliminar la Particion   -> %s <-   ?\n",nwInf->_name);
+    printf("Y = Yes , Any Other Key = No \n");
+
+    char Op;
+    Op = getchar();
+    if(Op =='\n' || Op =='\r'){
+        Op = getchar();
+    }
+
+    if(putchar(tolower(Op)) != 'y' ){
+        printf("\n");
+        printf("FDISK WARNING: Operacion Eliminar Particion Cancelada\n" );
+        Op = getchar();
+        return;
+    }
+
+    int index = MBRPartArray_GetIndex_By_PartName(Disk,nwInf->_name);
+
+    if(index == -1){
+
+        Batch* Prt = getBatch_By_PartName(nwInf->_path,Disk,nwInf->_name);
+        if(Prt == NULL){
+            printf("\n");
+            printf("FDISK ERROR: La Particion   -> %s <-   No Existe\n",nwInf->_name);
+            getchar();
+            return;
+        }
+        else{
+            //(^< ............ ............ ............ Delete Logic
+            if(Prt->Prev > 0){
+                EBR* Prev = LoadEBR(nwInf->_path,Prt->Prev);    
+                Prev->part_next = Prt->Next;
+                UpdateEBR(Prev,nwInf->_path);
+                if(strcasecmp(nwInf->_delete,"full") == 0){
+                    Part_1024_Erase(nwInf->_path,Prt->StartByte,Prt->Size);
+                    printf("\n");
+                    printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
+                    getchar();
+                    return;
+                }
+            }
+        }
+    }
+    else{
+        int tmpStartByte = Disk->mbr_partition[index].part_start;
+        int tmpPartSize  = Disk->mbr_partition[index].part_size;
+
+        Disk->mbr_partition[index] = *newPartition();
+        Ascending_MBRPartArray_BubbleSort(Disk);
+        UpdateMBR(nwInf->_path,Disk);
+        if(strcasecmp(nwInf->_delete,"full") == 0){
+            Part_1024_Erase(nwInf->_path,tmpStartByte,tmpPartSize);
+            printf("\n");
+            printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Full Delete\n",nwInf->_name);
+            Op = getchar();
+            return;
+        }
+    }
+
+    printf("\n");
+    printf("FDISK SUCESS: Particion   -> %s <-   Eliminada Exitosamente por Fast Delete\n",nwInf->_name); 
+    Op = getchar();   
 }
 
 void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
