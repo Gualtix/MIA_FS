@@ -433,6 +433,7 @@ void rep_cmd(InfoCatcher* nwInf){
 
 void mount_cmd(InfoCatcher* nwInf){
 
+    
     MBR* Disk = LoadMBR(nwInf->_path);
 
     if(Disk == NULL){
@@ -450,12 +451,13 @@ void mount_cmd(InfoCatcher* nwInf){
     }
 
     Mounted_Part* mP = getPartMounted_By_Name(nwInf->_name);
-
+    
     if(mP != NULL){
         printf("\n");
         printf("MOUNT ERROR: La Particion   -> %s <-   Ya esta Montada\n",nwInf->_name);
         return;
     }
+    
 
     char* mID = get_MountedPart_String_ID(nwInf->_path,nwInf->_name);
     Locat* lcat = vdTransform(mID);
@@ -473,7 +475,6 @@ void mount_cmd(InfoCatcher* nwInf){
         dI->index = lcat->Letter;
         dI->CompletePathDir = newString(nwInf->_path);
         UsingDisk_List[lcat->Letter] = *dI;
-        
     }
 
     //dI->mntList[lcat->Num] = *nw_mP;
@@ -481,6 +482,7 @@ void mount_cmd(InfoCatcher* nwInf){
     dI->mntList[lcat->Num] = *nw_mP;
     printf("\n");
     printf("MOUNT SUCCESS: Particion   -> %s <-   Montada con Exito: ID = %s\n",nwInf->_name,mID);    
+    
 }
 
 void unmount_cmd(InfoCatcher* nwInf){

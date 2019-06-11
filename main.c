@@ -9,10 +9,13 @@
 int main()
 {
 
+    
     int i = 0;
     while (i < 25){
         UsingDisk_List[i] = *newDisk_in_Use();
+        i++;
     }
+
     
     while (1){
         printf("\n");        
