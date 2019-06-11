@@ -155,5 +155,68 @@ Batch* newBatch(){
 
 
 
+typedef struct Mounted_Part{
+    char* ParName;
+    int status;
+    int index;
+}Mounted_Part;
+
+Mounted_Part* newMounted_Part(){    
+    Mounted_Part* mntPart = (Mounted_Part*)malloc(sizeof(Mounted_Part));
+    mntPart->ParName      = NULL;
+    mntPart->status       = 0;
+    mntPart->index        = -1;
+}
+
+typedef struct Disk_in_Use{
+    char* CompletePathDir;
+    Mounted_Part mntList [25];
+    int status;
+    int index;
+}Disk_in_Use;
+
+
+Disk_in_Use* newDisk_in_Use(){  
+    Disk_in_Use* dsk_in = (Disk_in_Use*)malloc(sizeof(sizeof(Disk_in_Use)));
+    dsk_in->CompletePathDir = NULL;
+    int cnt = 0;
+    while(cnt < 25){
+        dsk_in->mntList[cnt] = *newMounted_Part();
+        cnt++;
+    }
+    dsk_in->status = 0;
+    dsk_in->index  = -1;
+}
+
+
+typedef struct Locat
+{
+    int Letter;
+    int Num;
+}Locat;
+
+Locat* newLocat(){
+    Locat* lcat = (Locat*)malloc(sizeof(Locat));
+    lcat->Letter = -1;
+    lcat->Num    = -1;
+    return lcat;
+}
+
+
+
+
+
+
+
+Disk_in_Use UsingDisk_List [25];
+
+
+
+
+
+
+
+
+
 
 #endif // CONTAINER_H

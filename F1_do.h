@@ -255,7 +255,6 @@ void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
         EBR* DefaultEBR = LoadEBR(nwInf->_path,ext->StartByte);
         
         EBR* new_lgPart = newEBR();
-
         
         //if(DefaultEBR->part_start == tmp->Prev && strcasecmp(DefaultEBR->part_name,"UNDEFINED") == 0){
         if(strcasecmp(DefaultEBR->part_name,"UNDEFINED") == 0 && DefaultEBR->part_next > -1){

@@ -571,4 +571,149 @@ int DeleteAsk(char* Nm){
 
 
 
+
+
+Disk_in_Use* get_Disk_in_Use_By_DiskName(char* CompletePathDir){
+    
+    
+    Mounted_Part* mP;
+    Disk_in_Use*  dI;
+
+    int i = 0;
+    while (i < 25){
+        dI = &UsingDisk_List[i];
+        if(dI->status == 1){
+            if(strcasecmp(dI->CompletePathDir,CompletePathDir) == 0){
+                return dI;
+            }
+        }
+        i++;
+    }
+
+    return NULL;
+}
+
+int get_First_EmptyIndex_of_UsingDisk_List(){
+    int i = 0;
+    while (i < 25){
+        if(UsingDisk_List[i].status == 0){
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+int get_First_EmptyIndex_of_mntList(Disk_in_Use* dI){
+    
+    int i = 0;
+    while (i < 25){
+        Mounted_Part* mP = &dI->mntList[i];
+        if(mP->status == 0){
+            return i;
+        }
+        i++;
+    }
+    return -1;
+}
+
+Mounted_Part* getPartMounted_By_Name(char* PartName){
+
+    Mounted_Part* mP;
+    Disk_in_Use*  dI;
+
+    int i = 0;
+    while (i < 25){
+        dI = &UsingDisk_List[i];
+        if(dI->status == 1){
+            int j = 0;
+            while (j < 25){
+                mP = &dI->mntList[j];
+                if(mP->status == 1){
+                    
+                    if(strcasecmp(mP->ParName,PartName) == 0){
+                        return mP;
+                    }
+
+                }
+                j++;
+            }
+        }
+        i++;
+    }
+    return NULL;
+}
+
+char* get_MountedPart_String_ID(char* CompletePathDir,char* PartName){
+
+    //------------------------------
+    char lt;
+    int  nm;
+    char* mID = newString("vd");
+    //------------------------------
+
+    Disk_in_Use* dI = get_Disk_in_Use_By_DiskName(CompletePathDir);
+
+    if(dI == NULL){
+        lt = get_First_EmptyIndex_of_UsingDisk_List() + 97;
+        nm = get_First_EmptyIndex_of_mntList(dI) + 1;
+    }
+    else{
+        lt = dI->index + 97;
+        nm = get_First_EmptyIndex_of_mntList(dI) + 1;
+    }
+
+    //Concat Letter & Number ------------------
+    mID = Concat_Izq_with_Der(mID,&lt,'s','c');
+    mID = Concat_Izq_with_Der(mID,&nm,'i','s');
+    //-----------------------------------------
+
+    return mID;
+
+}
+
+
+Locat* vdTransform(char* mID){
+    Locat* lcat = newLocat();
+
+    lcat->Letter = mID[2] - 97;
+
+    if(strlen(mID) == 5){
+
+        int a = lcat->Num = mID[3] - 48;
+        int b = lcat->Num = mID[4] - 48;
+        lcat->Num = (a * 10) + b;
+    }
+    else{
+        lcat->Num = mID[3] - 48;
+    }
+
+    return lcat;
+}
+
+
 #endif // BELONG_H
+
+/*
+Mounted_Part* mP;
+Disk_in_Use*  dI;
+
+int i = 0;
+while (i < 25){
+    dI = &UsingDisk_List[i];
+    if(dI->status == 1){
+        
+        
+        int j = 0;
+        while (j < 25){
+            mP = &dI->mntList[j];
+            if(mP->status == 1){
+                
+            }
+            j++;
+        }
+
+    }
+    i++;
+}
+*/

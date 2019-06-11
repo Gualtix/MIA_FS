@@ -433,6 +433,54 @@ void rep_cmd(InfoCatcher* nwInf){
 
 void mount_cmd(InfoCatcher* nwInf){
 
+    MBR* Disk = LoadMBR(nwInf->_path);
+
+    if(Disk == NULL){
+        printf("\n");
+        printf("MOUNT ERROR: Disco   -> %s <-   , NO Encontrado\n",nwInf->_name);
+        return;
+    }
+
+    Batch* Part = getBatch_By_PartName(nwInf->_path,Disk,nwInf->_name);
+
+    if(Part == NULL){
+        printf("\n");
+        printf("MOUNT ERROR: La Particion   -> %s <-   No Existe\n",nwInf->_name);
+        return;
+    }
+
+    Mounted_Part* mP = getPartMounted_By_Name(nwInf->_name);
+
+    if(mP != NULL){
+        printf("\n");
+        printf("MOUNT ERROR: La Particion   -> %s <-   Ya esta Montada\n",nwInf->_name);
+        return;
+    }
+
+    char* mID = get_MountedPart_String_ID(nwInf->_path,nwInf->_name);
+    Locat* lcat = vdTransform(mID);
+
+    Mounted_Part* nw_mP = newMounted_Part();
+    nw_mP->status = 1;
+    nw_mP->ParName = newString(nwInf->_name);
+    nw_mP->index = lcat->Num;
+
+    Disk_in_Use* dI = get_Disk_in_Use_By_DiskName(nwInf->_path);
+
+    if(dI == NULL){
+        Disk_in_Use*  dI = newDisk_in_Use();
+        dI->status = 1;
+        dI->index = lcat->Letter;
+        dI->CompletePathDir = newString(nwInf->_path);
+        UsingDisk_List[lcat->Letter] = *dI;
+        
+    }
+
+    //dI->mntList[lcat->Num] = *nw_mP;
+
+    dI->mntList[lcat->Num] = *nw_mP;
+    printf("\n");
+    printf("MOUNT SUCCESS: Particion   -> %s <-   Montada con Exito: ID = %s\n",nwInf->_name,mID);    
 }
 
 void unmount_cmd(InfoCatcher* nwInf){
