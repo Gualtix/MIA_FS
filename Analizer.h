@@ -393,7 +393,7 @@ void f_disk_cmd(InfoCatcher* nwInf){
         return;
     }
     //(^< ............ ............ ............
-    if(nwInf->_add > -1){
+    if(nwInf->_add != -1){
         printf("\n");
         printf("FDISK ERROR: Esta Version No Soporta el Comando -add\n");
         return;
