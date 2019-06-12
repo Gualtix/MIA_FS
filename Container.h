@@ -206,6 +206,8 @@ Locat* newLocat(){
 
 
 
+int newLine_Flag;
+char* cmdString;
 
 
 Disk_in_Use UsingDisk_List [25];

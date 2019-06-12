@@ -217,6 +217,21 @@ int String_isNumber(char* Str){
     return 1;
 }
 
+int String_Has_this_Char(char* Str,char ch){
+    
+    int ln = strlen(Str);
+    
+    int i = 0;
+    while (i < ln){
+        if(Str[i] == ch){
+            return i;
+        }
+        i++;
+    }
+    
+    return - 1;
+}
+
 /*
 int IsString_a_Number(char* STR){
     int cnt = 0;

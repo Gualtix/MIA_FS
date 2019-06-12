@@ -393,7 +393,7 @@ void f_disk_cmd(InfoCatcher* nwInf){
         return;
     }
     //(^< ............ ............ ............
-    if(nwInf->_add != NULL){
+    if(nwInf->_add > -1){
         printf("\n");
         printf("FDISK ERROR: Esta Version No Soporta el Comando -add\n");
         return;
@@ -597,7 +597,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     else if(strcasecmp(Bf, "pause") == 0){
-        //getchar();
+        getchar();
         return 0;
     }
     return 1;
@@ -717,6 +717,23 @@ void ExecuteComand(char *InputString){
     InputString = StringCloneWithOut(InputString,'\'');
     InputString = StringCloneWithOut(InputString,'\n');
 
+    int rs = String_Has_this_Char(InputString,'\\');
+
+    if(newLine_Flag == 1){
+        
+        InputString  = Concat_Izq_with_Der(cmdString,InputString,'s','s');
+        newLine_Flag = 0;
+        cmdString    = NULL;
+        printf("CommandLine->   %s\n",InputString);
+    }
+
+    if(rs > -1){
+        InputString  = StringCloneWithOut(InputString,'\\');
+        newLine_Flag = 1;
+        cmdString    = newString(InputString);
+        return;
+    }
+
     if(strcasecmp(InputString, "Exit\n") == 0){
         printf("\n");
         printf("Saliendo de la APP...\n");
@@ -747,7 +764,7 @@ void ExecuteComand(char *InputString){
     if(unknownCMD != 0){
         unknownCMD = ScanF2(Main_CMD,nwInf);
     }
-
+    
     if(unknownCMD != 0){
         if (strcasecmp(Main_CMD,"Exec") == 0){        
             Exec_CMD(CommandList);
