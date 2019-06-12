@@ -52,7 +52,7 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         }
 
         //(^< ............ ............ ............   _path
-        if(strcmp(Prm_Izq,"-path") == 0){
+        if(strcasecmp(Prm_Izq,"-path") == 0){
             (*nwInf)->_path = newString(Prm_Der);
             continue;
         }
@@ -380,10 +380,28 @@ void f_disk_cmd(InfoCatcher* nwInf){
 
     //(^< ............ ............ ............ Delete
     if(nwInf->_delete != NULL){
-        int ssd = 5;
+
+        Mounted_Part* mP = getPartMounted_By_Name(nwInf->_name);
+    
+        if(mP != NULL){
+            printf("\n");
+            printf("FDISK ERROR: La Particion   -> %s <-   Esta Montada, No puede Eliminarse\n",nwInf->_name);
+            return;
+        }
+
         Delete_Part(nwInf,Disk);
         return;
     }
+    //(^< ............ ............ ............
+    if(nwInf->_add != NULL){
+        printf("\n");
+        printf("FDISK ERROR: Esta Version No Soporta el Comando -add\n");
+        return;
+    }
+
+    //(^< ............ ............ ............ ADD
+
+
     //(^< ............ ............ ............
 
     int nPrimary  = MBRPartArray_PrimaryCounter(Disk);
@@ -428,7 +446,42 @@ void f_disk_cmd(InfoCatcher* nwInf){
 }
 
 void rep_cmd(InfoCatcher* nwInf){
+    //rep –id~:~vda1 -Path~:~/home/user/reports/reporte1.jpg -name~:~mbr
+    Mounted_Part* mP = getPartMounted_By_vID(nwInf->_id);
+    
+    if(mP == NULL){
+        printf("\n");
+        printf("REP ERROR: El ID de Montaje   -> %s <-   No Existe\n",nwInf->_id);
+        return;
+    } 
 
+    char* tmp = nwInf->_path;
+    int ln = strlen(tmp);
+    tmp[ln - 1] = 't';
+    tmp[ln - 2] = 'o';
+    tmp[ln - 3] = 'd';
+
+    char* RepName = Path_Get_FileName(newString(nwInf->_path));
+    char* RepPath = Path_Get_Isolated(newString(nwInf->_path));
+
+    Locat* lcat = vdTransform(nwInf->_id);
+    char*  Disk_Dir = UsingDisk_List[lcat->Letter].CompletePathDir;
+
+    if(strcasecmp(nwInf->_name,"mbr") == 0){
+        Generate_MBR_Report(Disk_Dir,RepPath,RepName);
+        printf("\n");
+        printf("REP SUCCESS: Reporte DISK   -> %s <-   Generado con Exito\n",RepName);
+    }
+    else if(strcasecmp(nwInf->_name,"disk") == 0){
+        GenerateDiskRender(Disk_Dir,RepPath,RepName);
+        printf("\n");
+        printf("REP SUCCESS: Reporte DISK   -> %s <-   Generado con Exito\n",RepName);
+    }
+    else{
+        printf("\n");
+        printf("REP ERROR: Parametro -name   -> %s <-   No Valido\n",nwInf->_name);
+        return;
+    }
 }
 
 void mount_cmd(InfoCatcher* nwInf){
@@ -465,28 +518,43 @@ void mount_cmd(InfoCatcher* nwInf){
     Mounted_Part* nw_mP = newMounted_Part();
     nw_mP->status = 1;
     nw_mP->ParName = newString(nwInf->_name);
-    nw_mP->index = lcat->Num;
+    nw_mP->index = lcat->Num - 1;
 
     Disk_in_Use* dI = get_Disk_in_Use_By_DiskName(nwInf->_path);
 
     if(dI == NULL){
-        Disk_in_Use*  dI = newDisk_in_Use();
+        dI = newDisk_in_Use();
         dI->status = 1;
         dI->index = lcat->Letter;
         dI->CompletePathDir = newString(nwInf->_path);
+        dI->mntList[lcat->Num - 1] = *nw_mP;
         UsingDisk_List[lcat->Letter] = *dI;
     }
+    else{
+        dI->mntList[lcat->Num - 1] = *nw_mP;
+    }
 
-    //dI->mntList[lcat->Num] = *nw_mP;
-
-    dI->mntList[lcat->Num] = *nw_mP;
     printf("\n");
     printf("MOUNT SUCCESS: Particion   -> %s <-   Montada con Exito: ID = %s\n",nwInf->_name,mID);    
-    
+
 }
 
 void unmount_cmd(InfoCatcher* nwInf){
+    Mounted_Part* mP = getPartMounted_By_vID(nwInf->_id);
+    
+    if(mP == NULL){
+        printf("\n");
+        printf("MOUNT ERROR: El ID de Montaje   -> %s <-   No Existe\n",nwInf->_id);
+        return;
+    }   
 
+    Locat* lcat = vdTransform(nwInf->_id);
+
+    UsingDisk_List[lcat->Letter].mntList[lcat->Num - 1] = *newMounted_Part();
+
+    printf("\n");
+    printf("MOUNT SUCCESS: Particion   -> %s <-   Desmontada con Exito\n",nwInf->_id);
+    return;
 }
 
 
@@ -695,7 +763,7 @@ void ExecuteComand(char *InputString){
         }
     }
     
-    //getchar();
+    getchar();
 }
 
 

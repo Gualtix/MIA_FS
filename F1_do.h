@@ -180,11 +180,6 @@ void Delete_Part(InfoCatcher* nwInf, MBR* Disk){
 
 void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
-    if(strcasecmp(nwInf->_name,"wiwis") == 0){
-        int kssf = 53;
-
-    }
-
     //(^< ............ ............ ............ Space Validation
     DoublyGenericList* batchList = getBatchList_FromDisk(nwInf->_path,Disk);
 
@@ -243,9 +238,33 @@ void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
     }
     //(^< ............ ............ ............ Logic
     else{
-        int see = 866;
+
         Batch* ext = getExtended_Batch(batchList);
         Batch* tmp = get_First_SpaceBatch_That_Fits(ext->LgParts,nwInf->_size);
+
+        //(^< ............ ............ ............ ............ ............
+        batchList = getBatchList_FromDisk(nwInf->_path,Disk);
+
+        int ext_index = MBRPartArray_GetIndex_By_PartName(Disk,ext->PartName);
+        Partition extPart = Disk->mbr_partition[ext_index];
+
+        FType =  newString("Primer Ajuste");
+
+        if(extPart.part_fit[0] == 'f'){
+            Isolate_SpaceBatch(batchList);
+        }
+
+        if(extPart.part_fit[0] == 'b'){
+            get_Ascending_BatchSpace_List(batchList);
+            FType = newString("Mejor Ajuste");
+        }
+
+        if(extPart.part_fit[0] == 'w'){
+            get_Descending_BatchSpace_List(batchList);
+            FType = newString("Peor Ajuste");
+        }
+        //(^< ............ ............ ............ ............ ............
+
         if(tmp == NULL){
             printf("\n");
             printf("FDISK ERROR: No Existe Espacio para Crear La Particion\n");
@@ -302,19 +321,6 @@ void fdisk_do(InfoCatcher* nwInf, MBR* Disk){
 
                 UpdateEBR(prev_lgPart,nwInf->_path);
                 UpdateEBR(new_lgPart,nwInf->_path);
-
-                
-                /*
-                if(strcasecmp(nwInf->_name,"Part15") == 0){
-                    GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
-                }
-
-                int asdf = 86;
-                int afsdf = 8547;
-
-                MBR* uus = LoadMBR(nwInf->_path);
-                int afeesdf = 8547;
-                */
                 
             }
     

@@ -8,7 +8,6 @@
 
 int main()
 {
-
     
     int i = 0;
     while (i < 25){
@@ -16,7 +15,6 @@ int main()
         i++;
     }
 
-    
     while (1){
         printf("\n");        
         printf("(^< ............ ............ ............\n");

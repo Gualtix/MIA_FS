@@ -265,7 +265,7 @@ DoublyGenericList* getBatchList_FromExtended(EBR* DefaultEBR,char* CompletePathD
    return EBR_List;
 }
 
-    DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
+DoublyGenericList* getBatchList_FromDisk(char* CompletePathDir,MBR* Disk){
 
     
     DoublyGenericList* batchList = new_DoublyGenericList();
@@ -575,7 +575,6 @@ int DeleteAsk(char* Nm){
 
 Disk_in_Use* get_Disk_in_Use_By_DiskName(char* CompletePathDir){
     
-    
     Mounted_Part* mP;
     Disk_in_Use*  dI;
 
@@ -584,6 +583,7 @@ Disk_in_Use* get_Disk_in_Use_By_DiskName(char* CompletePathDir){
         dI = &UsingDisk_List[i];
         if(dI->status == 1){
             if(strcasecmp(dI->CompletePathDir,CompletePathDir) == 0){
+                //dI = dI + i; 
                 return dI;
             }
         }
@@ -616,6 +616,9 @@ int get_First_EmptyIndex_of_mntList(Disk_in_Use* dI){
     }
     return -1;
 }
+
+
+
 
 Mounted_Part* getPartMounted_By_Name(char* PartName){
 
@@ -656,7 +659,7 @@ char* get_MountedPart_String_ID(char* CompletePathDir,char* PartName){
 
     if(dI == NULL){
         lt = get_First_EmptyIndex_of_UsingDisk_List() + 97;
-        nm = get_First_EmptyIndex_of_mntList(dI) + 1;
+        nm = 1;
     }
     else{
         lt = dI->index + 97;
@@ -665,7 +668,7 @@ char* get_MountedPart_String_ID(char* CompletePathDir,char* PartName){
 
     //Concat Letter & Number ------------------
     mID = Concat_Izq_with_Der(mID,&lt,'s','c');
-    mID = Concat_Izq_with_Der(mID,&nm,'i','s');
+    mID = Concat_Izq_with_Der(mID,&nm,'s','i');
     //-----------------------------------------
 
     return mID;
@@ -689,6 +692,18 @@ Locat* vdTransform(char* mID){
     }
 
     return lcat;
+}
+
+Mounted_Part* getPartMounted_By_vID(char* mID){
+
+    Locat* lcat = vdTransform(mID);
+
+    Mounted_Part* Rs = &(UsingDisk_List[lcat->Letter].mntList[lcat->Num - 1]);
+
+    if(Rs->status == 0){
+        return NULL;
+    }
+    return Rs;
 }
 
 
@@ -716,5 +731,6 @@ while (i < 25){
 
     }
     i++;
+
 }
 */

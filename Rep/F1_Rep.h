@@ -188,4 +188,153 @@ void GenerateDiskRender(char* CompletePathDir,char* ReportPath,char* ReportName)
 
 }
 
+//(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
+//(^< ............ ............ ............ ............ ............ M B R
+//(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
+
+void Add_Separator(FILE* DotFl){
+    fprintf(DotFl,"\t\t\t\t<TR>\n");
+        fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\" colspan=\"2\">\n");
+            fprintf(DotFl,"\t\t\t\t\t\t*** *** *** *** *** ***<br/>\n");
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+    fprintf(DotFl,"\t\t\t\t</TR>\n");
+}
+
+void AddTopTittle(FILE* DotFl,char* TopTittle){
+    fprintf(DotFl,"\t\t\t\t<TR>\n");
+        fprintf(DotFl,"\t\t\t\t\t<TD bgcolor=\"#a3c2c2\" width = \"150\" colspan=\"2\">\n");
+            fprintf(DotFl,"\t\t\t\t\t\t- %s -<br/>\n",TopTittle);
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+    fprintf(DotFl,"\t\t\t\t</TR>\n");
+}
+
+void AddParamValue(FILE* DotFl,char* Color,char* ParamName,char* StringValue){
+    fprintf(DotFl,"\t\t\t\t<TR>\n");
+
+        fprintf(DotFl,"\t\t\t\t\t<TD bgcolor=%s width = \"150\">\n",Color);
+            fprintf(DotFl,"\t\t\t\t\t\t%s<br/>\n",ParamName);
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+
+        fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\">\n");
+            fprintf(DotFl,"\t\t\t\t\t\t%s<br/>\n",StringValue);
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+
+    fprintf(DotFl,"\t\t\t\t</TR>\n");
+}
+
+void AddMBRBlock(FILE* DotFl,MBR* Bf){
+    char* Color = newString("\"#00cc99\"");
+    Add_Separator(DotFl);
+    AddTopTittle(DotFl,"MBR");
+    AddParamValue(DotFl,Color,"mbr_tamano",toString(&Bf->mbr_tamano,'i'));
+    AddParamValue(DotFl,Color,"mbr_fecha_creacion",toString(Bf->mbr_fecha_creacion,'s'));
+    AddParamValue(DotFl,Color,"mbr_disk_signature",toString(&Bf->mbr_disk_signature,'i'));
+    AddParamValue(DotFl,Color,"disk_fit",toString(&Bf->disk_fit,'c'));
+    Add_Separator(DotFl);
+}
+
+void AddEBRBlock(FILE* DotFl,EBR* Er){
+
+    char* Color = newString("\"#ff9900\"");
+
+    char* EBR_Name = Concat_Izq_with_Der(newString("EBR: "),Er->part_name,'s','s');
+
+    Add_Separator(DotFl);
+    AddTopTittle(DotFl,EBR_Name);
+    AddParamValue(DotFl,Color,"part_status",toString(&Er->part_status,'c'));
+    AddParamValue(DotFl,Color,"part_fit",toString(&Er->part_fit,'c'));
+    AddParamValue(DotFl,Color,"part_start",toString(&Er->part_start,'i'));
+    AddParamValue(DotFl,Color,"part_size",toString(&Er->part_size,'i'));
+    AddParamValue(DotFl,Color,"part_next",toString(&Er->part_next,'i'));
+    AddParamValue(DotFl,Color,"part_name",Er->part_name);
+    Add_Separator(DotFl);
+}
+
+void AddPartitionBlock(FILE* DotFl,Partition Prt){
+
+    char* Color = newString("\"#c6ff1a\"");
+
+    char* Part_Name = Concat_Izq_with_Der(newString("Partition: "),Prt.part_name,'s','s');
+
+    Add_Separator(DotFl);
+    AddTopTittle(DotFl,Part_Name);
+    AddParamValue(DotFl,Color,"part_status_",toString(&Prt.part_status,'c'));
+    AddParamValue(DotFl,Color,"part_type_",toString(&Prt.part_type,'c'));
+    AddParamValue(DotFl,Color,"part_fit_",toString(&Prt.part_fit[0],'c'));
+    AddParamValue(DotFl,Color,"part_start_",toString(&Prt.part_start,'i'));
+    AddParamValue(DotFl,Color,"part_size_",toString(&Prt.part_size,'i'));
+    AddParamValue(DotFl,Color,"part_name_",Prt.part_name);
+    Add_Separator(DotFl);
+}
+
+void Generate_MBR_Report(char* CompletePathDir,char* ReportPath,char* ReportName){
+    //(^< ............ ............ ............   J O I N :   R E P O R T P A T H   &   R E P O R T N A M E
+    char* CompleteReportPathDir = Concat_Izq_with_Der(ReportPath,ReportName,'s','s');
+    char* DiskName = Path_Get_FileName(CompletePathDir);
+
+    //(^< ............ ............ ............   D I S K   L O A D
+    MBR* Disk = LoadMBR(CompletePathDir);
+
+    //(^< ............ ............ ............   R E P O R T
+    CreatePathDir(ReportPath);
+
+    FILE* DotFl = fopen(CompleteReportPathDir,"w+");
+
+    //(^< ............ ............ ...........   D O T   F I L E
+    if(DotFl){
+        fprintf(DotFl,"digraph test {\n");
+            fprintf(DotFl,"\tnode[shape=plaintext];\n");
+            fprintf(DotFl,"\tDiskStruct\n");
+            fprintf(DotFl,"\t[\n");
+
+            fprintf(DotFl,"\t\tlabel = \n");
+
+                fprintf(DotFl,"\t\t<\n");
+
+                    fprintf(DotFl,"\t\t\t<TABLE border=\"0\" cellborder=\"1\" cellspacing=\"0\" cellpadding=\"0\">\n");
+                        //fprintf(DotFl,"\t\t\t\t<TR>\n");
+                        //(^< ............ ............ ........... R E C O R R I D O
+                        AddTopTittle(DotFl,DiskName);
+                        AddMBRBlock(DotFl,Disk);
+
+                        int cnt = 0;
+                        while(cnt < 4){
+                            if(Disk->mbr_partition[cnt].part_start != -1){
+                                AddPartitionBlock(DotFl,Disk->mbr_partition[cnt]);
+                                if(Disk->mbr_partition[cnt].part_type == 'e'){
+
+                                    DoublyGenericList* btList = getBatchList_FromDisk(CompletePathDir,Disk);
+                                    Batch* ext = getExtended_Batch(btList);
+
+                                    while(ext->LgParts->Length > 0){
+                                        Batch* tmp = (Batch*)(DeQueue(ext->LgParts));
+
+                                        if(tmp->Type == 'q'){
+                                            EBR* Er = LoadEBR(CompletePathDir,tmp->StartByte);
+                                            AddEBRBlock(DotFl,Er);
+                                        }
+                                    }
+
+                                }
+                            }
+                            cnt++;
+                        }
+
+                        //fprintf(DotFl,"\t\t\t\t</TR>\n");
+
+                    fprintf(DotFl,"\t\t\t</TABLE>\n");
+
+                fprintf(DotFl,"\t\t>,\n");
+
+            fprintf(DotFl,"\t];\n");
+
+        fprintf(DotFl,"}");
+    }
+
+    fclose(DotFl);
+    char* Tmp = newString("xdg-open ");
+    Tmp = Concat_Izq_with_Der(Tmp,CompleteReportPathDir,'s','s');
+    system(Tmp);
+}
+
 #endif // F1_REP

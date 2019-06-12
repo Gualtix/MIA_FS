@@ -37,6 +37,44 @@ char* newString(const char* Str){
     return Rs;
 }
 
+char* toString(void* _Izq, char It){
+
+    char* Izq = newString(100);
+
+    if(_Izq != NULL){
+        //------------ I Z Q
+        if(It == 'c'){
+            char* tmp = (char*) _Izq;
+            Izq = newString(1);
+            Izq[0] = tmp[0];
+        }
+
+        if(It == 's'){
+            Izq = (char*) _Izq;
+        }
+
+        if(It == 'i'){
+            int *tmp = (int*) _Izq;
+            sprintf(Izq,"%d",*tmp);
+        }
+
+        if(It == 'd'){
+            double* tmp = (double*) _Izq;
+            sprintf(Izq,"%0.2f",*tmp);
+        }
+    }
+
+    if(_Izq == NULL){
+        return NULL;
+    }
+
+    int Ln = strlen(Izq);
+    char* Str = newString(Ln);
+    strcpy(Str,Izq);
+    return Str;
+
+}
+
 char* Concat_Izq_with_Der(void* _Izq, void* _Der, char It, char Dt){
 
     char* Izq = newString(100);
