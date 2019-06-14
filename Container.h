@@ -10,7 +10,6 @@
 #define Kilo 1024
 #define Mega (Kilo * 1024)
 
-
 typedef struct EBR{
     char  part_status;
     char  part_fit;
@@ -35,8 +34,7 @@ EBR* newEBR(){
     return nEBR;
 }
 
-typedef struct Partition
-{
+typedef struct Partition{
     char  part_status;
     char  part_type;
     char  part_fit[2];
@@ -62,8 +60,7 @@ Partition* newPartition(){
     return nPart;
 }
 
-typedef struct MBR
-{
+typedef struct MBR{
     int       mbr_tamano;
     char      mbr_fecha_creacion [17];
     int       mbr_disk_signature;
@@ -98,9 +95,7 @@ MBR* newMBR(){
 
 }
 
-
-typedef struct InfoCatcher
-{
+typedef struct InfoCatcher{
     int   _size;
     char* _fit;
     char* _unit;
@@ -126,8 +121,7 @@ InfoCatcher* newInfoCatcher(){
     return nwInfo;
 }
 
-typedef struct Batch
-{
+typedef struct Batch{
     int   StartByte;
     int   Size;
     int   EndByte;
@@ -151,10 +145,6 @@ Batch* newBatch(){
     Bt->Next      = - 1;
 }
 
-
-
-
-
 typedef struct Mounted_Part{
     char* ParName;
     int status;
@@ -175,7 +165,6 @@ typedef struct Disk_in_Use{
     int index;
 }Disk_in_Use;
 
-
 Disk_in_Use* newDisk_in_Use(){  
     Disk_in_Use* dsk_in = (Disk_in_Use*)malloc(sizeof(sizeof(Disk_in_Use)));
     dsk_in->CompletePathDir = NULL;
@@ -188,9 +177,7 @@ Disk_in_Use* newDisk_in_Use(){
     dsk_in->index  = -1;
 }
 
-
-typedef struct Locat
-{
+typedef struct Locat{
     int Letter;
     int Num;
 }Locat;
@@ -202,14 +189,8 @@ Locat* newLocat(){
     return lcat;
 }
 
-
-
-
-
 int newLine_Flag;
 char* cmdString;
-
-
 Disk_in_Use UsingDisk_List [25];
 
 

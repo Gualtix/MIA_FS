@@ -569,10 +569,6 @@ int DeleteAsk(char* Nm){
     return 1;
 }
 
-
-
-
-
 Disk_in_Use* get_Disk_in_Use_By_DiskName(char* CompletePathDir){
     
     Mounted_Part* mP;
@@ -616,9 +612,6 @@ int get_First_EmptyIndex_of_mntList(Disk_in_Use* dI){
     }
     return -1;
 }
-
-
-
 
 Mounted_Part* getPartMounted_By_Name(char* PartName){
 
@@ -675,7 +668,6 @@ char* get_MountedPart_String_ID(char* CompletePathDir,char* PartName){
 
 }
 
-
 Locat* vdTransform(char* mID){
     Locat* lcat = newLocat();
 
@@ -706,31 +698,35 @@ Mounted_Part* getPartMounted_By_vID(char* mID){
     return Rs;
 }
 
+void Print_Mounted_Parts(){
+    Mounted_Part* mP;
+    Disk_in_Use*  dI;
+
+    int i = 0;
+    while (i < 25){
+        dI = &UsingDisk_List[i];
+        
+        if(dI->status == 1){
+            char* DiskName = Path_Get_FileName(dI->CompletePathDir);
+            printf("\n");
+            printf("Disco   -> %s <-\n",DiskName);
+            int j = 0;
+            while (j < 25){
+                mP = &dI->mntList[j];
+                if(mP->status == 1){
+                    char* IDE = newString("vd");
+                    char lt = (i + 97);
+                    int  Nm = (j + 1);
+                    IDE = Concat_Izq_with_Der(IDE,&lt,'s','c');
+                    IDE = Concat_Izq_with_Der(IDE,&Nm,'s','i');
+                    printf("\tParticion   -> %s <-       ID   -> %s <-\n",mP->ParName,IDE);
+                }
+                j++;
+            }
+        }
+        i++;
+    }
+}
 
 
 #endif // BELONG_H
-
-/*
-Mounted_Part* mP;
-Disk_in_Use*  dI;
-
-int i = 0;
-while (i < 25){
-    dI = &UsingDisk_List[i];
-    if(dI->status == 1){
-        
-        
-        int j = 0;
-        while (j < 25){
-            mP = &dI->mntList[j];
-            if(mP->status == 1){
-                
-            }
-            j++;
-        }
-
-    }
-    i++;
-
-}
-*/

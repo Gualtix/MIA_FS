@@ -4,8 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-typedef struct GeNode
-{
+typedef struct GeNode{
     void *Dt;
     struct GeNode *Next;
     struct GeNode *Previous;

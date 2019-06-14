@@ -22,8 +22,8 @@ int main()
         printf("\n");        
         printf("(^< ............ ............ ............\n");
         printf("Ready to Execute:\n");
-        char *InputString = CatchCommandLine();
-        //char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/Entrada_F1.sh");
+        //char *InputString = CatchCommandLine();
+        char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/Entrada_F1.sh");
         int Rs = strcasecmp(InputString, "exit\n");
         ExecuteComand(InputString);
         if (Rs == 0){

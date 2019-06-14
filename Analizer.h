@@ -537,6 +537,9 @@ void mount_cmd(InfoCatcher* nwInf){
     printf("\n");
     printf("MOUNT SUCCESS: Particion   -> %s <-   Montada con Exito: ID = %s\n",nwInf->_name,mID);    
 
+    Print_Mounted_Parts();
+    return;
+
 }
 
 void unmount_cmd(InfoCatcher* nwInf){
@@ -554,6 +557,8 @@ void unmount_cmd(InfoCatcher* nwInf){
 
     printf("\n");
     printf("MOUNT SUCCESS: Particion   -> %s <-   Desmontada con Exito\n",nwInf->_id);
+
+    Print_Mounted_Parts();
     return;
 }
 

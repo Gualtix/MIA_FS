@@ -296,8 +296,7 @@ GeNode *DeQueue(DoublyGenericList *TmpGeList){
 //(^< ............ ............ ............ ............ ............ P R I N T
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-void PrintGeneric(DoublyGenericList *TmpGeList, void (*GenFunc)(void *GenericData))
-{
+void PrintGeneric(DoublyGenericList *TmpGeList, void (*GenFunc)(void *GenericData)){
     if(!isEmpty(TmpGeList->Length)){
         
         GeNode *Current = TmpGeList->First;

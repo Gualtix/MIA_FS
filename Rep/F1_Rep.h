@@ -182,9 +182,23 @@ void GenerateDiskRender(char* CompletePathDir,char* ReportPath,char* ReportName)
     }
 
     fclose(DotFl);
+
     char* Tmp = newString("xdg-open ");
     Tmp = Concat_Izq_with_Der(Tmp,CompleteReportPathDir,'s','s');
     system(Tmp);
+
+    char* alt = newString("dot -Tpng ");
+    alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+    alt = Concat_Izq_with_Der(alt,newString(" "),'s','s');
+    alt = Concat_Izq_with_Der(alt,newString(" -o "),'s','s');
+
+    int ln = strlen(CompleteReportPathDir);
+    CompleteReportPathDir[ln - 1] = 'g';
+    CompleteReportPathDir[ln - 2] = 'n';
+    CompleteReportPathDir[ln - 3] = 'p';
+    alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+
+    system(alt);
 
 }
 
@@ -332,9 +346,23 @@ void Generate_MBR_Report(char* CompletePathDir,char* ReportPath,char* ReportName
     }
 
     fclose(DotFl);
+
     char* Tmp = newString("xdg-open ");
     Tmp = Concat_Izq_with_Der(Tmp,CompleteReportPathDir,'s','s');
     system(Tmp);
+
+    char* alt = newString("dot -Tpdf ");
+    alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+    alt = Concat_Izq_with_Der(alt,newString(" "),'s','s');
+    alt = Concat_Izq_with_Der(alt,newString(" -o "),'s','s');
+
+    int ln = strlen(CompleteReportPathDir);
+    CompleteReportPathDir[ln - 1] = 'f';
+    CompleteReportPathDir[ln - 2] = 'd';
+    CompleteReportPathDir[ln - 3] = 'p';
+    alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+
+    system(alt);
 }
 
 #endif // F1_REP
