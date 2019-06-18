@@ -8,7 +8,17 @@
         "fdisk.h": "c",
         "tabletyperep.h": "c",
         "c_graphviz.h": "c",
-        "analizer.h": "c"
+        "analizer.h": "c",
+        "validate.h": "c",
+        "container.h": "c",
+        "ctype.h": "c",
+        "f2_do.h": "c",
+        "glovs.h": "c",
+        "f1_rep.h": "c",
+        "f1_do.h": "c",
+        "container2.h": "c",
+        "stdio.h": "c",
+        "stdlib.h": "c"
     },
     "workbench.colorCustomizations": {
         //"activityBar.background": "#06011b",

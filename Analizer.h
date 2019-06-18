@@ -8,9 +8,14 @@
 
 #include "Fw/DoublyGenericList.h"
 #include "Fw/StringHandler.h"
+
 #include "Container.h"
+
 #include "F1_do.h"
+
 #include "Rep/F1_Rep.h"
+#include "Validate.h"
+
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ T O O L S
@@ -85,6 +90,40 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         //(^< ............ ............ ............   _id
         if(strcmp(Prm_Izq,"-id") == 0){
             (*nwInf)->_id = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _fs
+        if(strcasecmp(Prm_Izq,"-fs") == 0){
+            (*nwInf)->_fs = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _usr
+        if(strcasecmp(Prm_Izq,"-usr") == 0){
+            (*nwInf)->_usr = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _pws
+        if(strcasecmp(Prm_Izq,"-pwd") == 0){
+            (*nwInf)->_pwd = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _P
+        if(!strcasecmp(Prm_Izq,"-P")){
+            (*nwInf)->_P = 1;
+            if(Prm_Der != NULL){
+                FrontInsert(CommandList,Prm_Der);
+            }
+            continue;
+        }
+
+        //(^< ............ ............ ............   _R
+        if(!strcasecmp(Prm_Izq,"-R")){
+            (*nwInf)->_R = 1;
+            FrontInsert(CommandList,Prm_Der);
             continue;
         }
 
@@ -314,7 +353,24 @@ char *CatchCommandLine(){
 
 void mk_disk_cmd(InfoCatcher* nwInf){
     //Check
+    
+    if(nwInf->_size == -1){
+        return;
+    }
 
+    if(nwInf->_fit == NULL){
+        nwInf->_fit = newString("ff");
+    }
+
+    if(nwInf->_unit == NULL){
+        nwInf->_fit = newString("k");
+    }
+
+    if(nwInf->_path == NULL){
+        return;
+    }
+
+    
     mkdisk_do(nwInf);
 }
 
@@ -328,7 +384,7 @@ void f_disk_cmd(InfoCatcher* nwInf){
     //(^< ............ ............ ............ ............ ............ C H E C K
 
     //(^< ............ ............ ............ Obligatory
-    if(nwInf->_size == NULL && nwInf->_add == -1){
+    if(nwInf->_size == -1 && nwInf->_add == -1){
         printf("\n");
         printf("FDISK ERROR: Parametro Obligatorio -size Faltante\n");
         return;
@@ -567,7 +623,34 @@ void unmount_cmd(InfoCatcher* nwInf){
 //(^< ............ ............ ............ ............ ............ F 2
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
+void mkfs_cmd(InfoCatcher* nwInf){
+    // 0 = No Errors
+    if(ErrorManager(nwInf,"MKFS") == 0){
+        mkfs_do(nwInf);
+        char* PartName = (getPartMounted_By_vID(nwInf->_id))->ParName;
+        printf("\n");
+        printf("MKFS SUCCESS: Particion:   -> %s <-   ID:   -> %s <-   Formateada Exitosamente por %s\n",PartName,nwInf->_id,nwInf->_fs);
+    }    
+}
 
+void login_cmd(InfoCatcher* nwInf){
+    // 0 = No Errors
+    if(ErrorManager(nwInf,"LOGIN") == 0){
+        login_do(nwInf);
+        printf("\n");
+        printf("LOGIN SUCCESS: Sesion Iniciada Exitosamente\n");
+    } 
+    
+}
+
+void mkgrp_cmd(InfoCatcher* nwInf){
+
+    if(nwInf->_grp == NULL){
+        //login_do(nwInf);
+        printf("\n");
+        printf("MKGRP SUCCESS: Grupo   -> %s <-   Exitosamente\n",nwInf->_grp);
+    } 
+}
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ P H A S E S
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -576,7 +659,6 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
 
     if(strcasecmp(Bf, "mkdisk") == 0){
         mk_disk_cmd(nwInf);
-        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
         return 0;
     }
     else if(strcasecmp(Bf, "rmdisk") == 0){
@@ -585,8 +667,6 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
     }
     else if(strcasecmp(Bf, "fdisk") == 0){
         f_disk_cmd(nwInf);
-        //GenerateDiskRender("/home/archivos/fase1/Disco1.disk","/home/wrm/Desktop/","Ds.dot");
-        //getchar();
         return 0;
     }
     else if(strcasecmp(Bf, "rep") == 0){
@@ -610,38 +690,46 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
 
 int ScanF2(char* Bf,InfoCatcher* nwInf){
 
-    /*
-    if (!strcasecmp(Bf, "mkfs")){
-        mkfs_cmd(CommandList);
+    if (strcasecmp(Bf, "mkfs") == 0){
+        mkfs_cmd(nwInf);
         return 0;
     }
     else if (!strcasecmp(Bf, "login")){
-        if(Usr_inUse != NULL){
+        login_cmd(nwInf);
+        
+        if(Omni->LoggedUser != NULL){
             printf("\n");
             printf("LOGIN ERROR: Ya existe una Sesion Iniciada...\n");
             return 0;
         }
-        login_cmd(CommandList);
+        login_cmd(nwInf);
+        
         return 0;
     }
     else if (!strcasecmp(Bf, "logout")){
-        int lg = is_it_Logged();
-        if(lg == 0){
+
+        if(Omni->LoggedUser ==  NULL){
             printf("\n");
             printf("LOGOUT ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
-        logout_cmd();
+        
+        Omni = newGLS();
+        printf("\n");
+        printf("LOGOUT SUCCESS: Sesion Cerrada Exitosamente...\n");
         return 0;
     }
+    
     else if (!strcasecmp(Bf, "mkgrp")){
-        int lg = is_it_Logged();
-        if(lg == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("MKGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
-        mkgrp_cmd(CommandList);
+        mkgrp_cmd(nwInf);
         return 0;
     }
+    /*
     else if (!strcasecmp(Bf, "rmgrp")){
         int lg = is_it_Logged();
         if(lg == 0){
@@ -666,10 +754,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         rmusr_cmd(CommandList);
         return 0;
     }
-    else if (!strcasecmp(Bf, "pause")){
-        getchar();
-        return 0;
-    }
+    
     else if (!strcasecmp(Bf, "mkdir")){
         int lg = is_it_Logged();
         if(lg == 0){
@@ -697,8 +782,6 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
     
     return 1;
     */
-
-
 
    return 1;
 }
@@ -785,7 +868,7 @@ void ExecuteComand(char *InputString){
         }
     }
     
-    getchar();
+    //getchar();
 }
 
 

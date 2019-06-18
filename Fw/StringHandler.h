@@ -14,7 +14,6 @@ char* newString(int Ln){
     return Str;
 }
 
-
 char* newString(char* Str){
     int Ln = strlen(Str);
     char* Rs = newString(Ln);

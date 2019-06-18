@@ -6,6 +6,36 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct FileFolderInfo
+{
+    DoublyGenericList* PathPlacesList;
+    int isRecursive;
+    char* FileName;
+    char* txtData;
+}FileFolderInfo;
+
+FileFolderInfo* newFileFolderInfo(){
+    FileFolderInfo* Rs = (FileFolderInfo*)malloc(sizeof(FileFolderInfo));
+
+    Rs->PathPlacesList = new_DoublyGenericList();
+    Rs->isRecursive    = 0;
+    Rs->FileName       = NULL;
+
+}
+
+typedef struct Journaling{
+    int journal_tipo_operacion;
+    int journal_tipo;
+    int journal_nombre;
+    int journal_contenido;
+    int journal_fecha;
+    int journal_propietario;
+    int journal_permisos;
+
+}Journaling;
+
+
+
 typedef struct SuperBlock{
     int s_filesystem_type;
     int s_inodes_count;
@@ -25,6 +55,31 @@ typedef struct SuperBlock{
     int s_inode_start;
     int s_block_start;
 }SuperBlock;
+
+SuperBlock* newSuperBlock(){
+
+    SuperBlock* Tmp = (SuperBlock*)malloc(sizeof(SuperBlock));
+
+    Tmp->s_filesystem_type = -1;
+    Tmp->s_inodes_count = -1;
+    Tmp->s_blocks_count = -1;
+    Tmp->s_free_blocks_count = -1;
+    Tmp->s_free_inodes_count = -1;
+    Tmp->s_mtime = -1;
+    Tmp->s_umtime = -1;
+    Tmp->s_mnt_count = -1;
+    Tmp->s_magic = -1;
+    Tmp->s_inode_size = -1;
+    Tmp->s_block_size = -1;
+    Tmp->s_first_ino = -1;
+    Tmp->s_first_blo = -1;
+    Tmp->s_bm_inode_start = -1;
+    Tmp->s_bm_block_start = -1;
+    Tmp->s_inode_start = -1;
+    Tmp->s_block_start = -1;
+
+    return Tmp;
+}
 
 typedef struct SeekInfo{
     int FB_Bit_ID;
@@ -151,6 +206,27 @@ PointerBlock* newPointerBlock(){
         cnt++;
     }
     return Pb;
+}
+
+typedef struct GroupUserInfo
+{
+    int   ID;
+    char  Type;
+    char* GrpName;
+    char* UsrName;
+    char* Password;
+
+}GroupUserInfo;
+
+GroupUserInfo* newGrus(){
+    GroupUserInfo* Row = (GroupUserInfo*)malloc(sizeof(GroupUserInfo));
+
+    Row->ID       = -1;
+    Row->Type     = '\0';
+    Row->GrpName  = NULL;
+    Row->UsrName  = NULL;
+    Row->Password = NULL;
+    Row;
 }
 
 #endif // CONTAINER2_H

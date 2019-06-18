@@ -5,12 +5,14 @@
 #include "Fw/StringHandler.h"
 #include "Fw/Helper.h"
 #include "Analizer.h"
+#include "Glovs.h"
 
 int main()
 {
-
     newLine_Flag = 0;
     cmdString    = NULL;
+
+    Omni = newGLS();
     
     int i = 0;
     while (i < 25){
@@ -23,14 +25,14 @@ int main()
         printf("(^< ............ ............ ............\n");
         printf("Ready to Execute:\n");
         //char *InputString = CatchCommandLine();
-        char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/Entrada_F1.sh");
+        char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/EntradaF2.sh");
         int Rs = strcasecmp(InputString, "exit\n");
         ExecuteComand(InputString);
         if (Rs == 0){
             break;
         }
         break;
-    }    
+    }   
     
     printf("(^< ............ S A L I E N D O ............\n");
     return 0;

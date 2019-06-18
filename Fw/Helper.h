@@ -17,6 +17,15 @@
 #define Mega (Kilo * 1024)
 
 
+
+char* getDateTime(){
+    time_t Tmp = time(0);
+    char ShapeDate[20];
+    strftime(ShapeDate,128,"%d/%m/%y %H:%M:%S",localtime(&Tmp));
+    char* Dt = newString(&ShapeDate[0]);
+    return Dt;
+}
+
 DoublyGenericList* PathSeparate(char* CompletePathDir){
 
     DoublyGenericList* PathList = new_DoublyGenericList();
@@ -147,6 +156,106 @@ int CreatePathDir(char* Path){
 
     return Validate_If_Path_Exists(Path)? 1:0;
 }
+
+char* Write_txtFile(char* Path, char* Content){
+    FILE* Fl = fopen(Path,"w");
+    if(Fl){
+        int results = fputs(Content, Fl);
+        fclose(Fl);
+    }
+    
+}
+
+char* getString_from_File(char* Path){
+
+    FILE* fp = fopen (Path,"rb");
+    long lSize;
+    char* buffer;
+
+    if(fp){
+        
+        //fp = fopen (Path, "rb" );
+        //if( !fp ) perror(Path),exit(1);
+
+        fseek(fp,0L,SEEK_END);
+        lSize = ftell(fp);
+        rewind(fp);
+
+        /* allocate memory for entire content */
+        buffer = (char*)calloc( 1, lSize+1 );
+        if(!buffer)fclose(fp),fputs("memory alloc fails",stderr),exit(1);
+
+        /* copy the file into the buffer */
+        if(1!=fread(buffer,lSize,1,fp))
+        fclose(fp),free(buffer),fputs("entire read fails",stderr),exit(1);
+
+        /* do your work here, buffer is a string contains the whole text */
+        fclose(fp);
+        //free(buffer);
+
+        return newString(buffer);
+    }
+    else{
+        return NULL;
+    }
+    
+}
+
+DoublyGenericList* getSubstring_64CharList(char* Content){
+
+    DoublyGenericList* Ls = new_DoublyGenericList();
+
+    // ******* File Content Sharing *******
+    int contLen = strlen(Content);
+    int Base = 63;
+    int nB = (contLen / Base);
+    int nR = (contLen % Base);
+    
+    int ptr = 0;
+    
+    int cnt = 0;
+    while(cnt < nB){
+        char* str = newString(Base);
+    
+        //memset(str,'\0',sizeof(char) * Base);
+        int i = 0;
+        while(i < Base){
+            str[i] = Content[ptr];
+            i++;
+            ptr++;
+        }
+
+        //str[63] = '\0';
+        EnQueue(Ls,str);
+        cnt++;
+    }
+
+
+    if(nR > 0){
+
+        int Lm = nR;
+        int i = 0;
+
+        char* str = newString(Base);
+        memset(str,'\0',sizeof(char) * Base);
+
+        while(i < Lm){
+            str[i] = Content[ptr];
+            i++;
+            ptr++;
+        }
+
+        EnQueue(Ls,str);
+    }
+
+
+    if(Ls->Length > 0){
+        return Ls;
+    }
+
+    return NULL;
+}
+
 
 
 #endif // HELPER_H

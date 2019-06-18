@@ -105,6 +105,18 @@ typedef struct InfoCatcher{
     char* _name;
     int   _add;
     char* _id;
+
+    // ***** F2 *****
+    char* _fs;
+    char* _pwd;
+    char* _usr;
+    char* _grp;
+    int   _ugo;
+    int   _R;
+    int   _P;
+    char* _cont;
+    char* _dest;
+    char* txtData;
 }InfoCatcher;
 
 InfoCatcher* newInfoCatcher(){
@@ -118,6 +130,19 @@ InfoCatcher* newInfoCatcher(){
     nwInfo->_name   = NULL;
     nwInfo->_add    = -1;
     nwInfo->_id     = NULL;
+
+    // ***** F2 *****
+    nwInfo->_fs     = NULL;
+    nwInfo->_pwd    = NULL;
+    nwInfo->_usr    = NULL;
+    nwInfo->_grp    = NULL;
+    nwInfo->_ugo    = -1;
+    nwInfo->_R      = -1;
+    nwInfo->_P      = -1;
+    nwInfo->_cont   = NULL;
+    nwInfo->_dest   = NULL;
+    nwInfo->txtData = NULL;
+    
     return nwInfo;
 }
 
