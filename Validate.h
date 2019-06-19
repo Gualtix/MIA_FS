@@ -30,18 +30,20 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     //MKFS   ****************************************************************************************************** 
     if(strcasecmp(CMD,"MKFS") == 0){
         //(^< ............ ............ ............ ............ ............ -id: Mandatory
-        _id_Val(nwInf->_id);
+        if(_id_Val(nwInf->_id) == 1) return 1;
+        
         //(^< ............ ............ ............ ............ ............ -type: Optional
         if(nwInf->_type == NULL){
             ErrorPrinter("MKFS","WARNING","-type","NULL","Usando Default FULL");
             nwInf->_type = newString("full");
         }
+
         //(^< ............ ............ ............ ............ ............ -fs: Optional
         if(nwInf->_fs == NULL){
             ErrorPrinter("MKFS","WARNING","-fs","NULL","Usando Default EXT3");
             nwInf->_fs = newString("3fs");
-            return 0;
         }
+        return 0;
     }
     //LOGIN   ***************************************************************************************************** 
     else if(strcasecmp(CMD,"LOGIN") == 0){
@@ -53,10 +55,7 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         }
 
         //(^< ............ ............ ............ ............ ............ -id: Mandatory
-        int Rt = _id_Val(nwInf->_id);
-        if(Rt == 1){
-            return 1;
-        }
+        if(_id_Val(nwInf->_id) == 1) return 1;
 
         //(^< ............ ............ ............ ............ ............ -usr: Mandatory
         if(nwInf->_usr == NULL){
@@ -72,7 +71,6 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         GroupUserInfo* gu = getUSR_by_Name(nwInf->_usr,usrList);
 
         int usr = usrExists(nwInf->_usr,usrList);
-        //int grp = grpExists(nwInf->_grp,grpList);
         
         if(usr == -1){
             ErrorPrinter("LOGIN","ERROR","-usr",nwInf->_usr,"El Usuario no Existe");
@@ -91,12 +89,126 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         }
 
         Omni->LoggedUser = gu;
-    }
-    //LOGOUT   **************************************************************************************************** 
+        return 0;
+    } 
     //MKGRP   ***************************************************************************************************** 
+    else if(strcasecmp(CMD,"MKGRP") == 0){
+    
+        //(^< ............ ............ ............ ............ ............ root use only
+        if (strcasecmp(Omni->LoggedUser->UsrName,"root") != 0){
+            ErrorPrinter("MKGRP","ERROR","Usuario",Omni->LoggedUser->UsrName,"Solo root puede usar MKGRP");
+            return 1;
+        }
+    
+        //(^< ............ ............ ............ ............ ............ -name: Mandatory
+        if(nwInf->_name == NULL){
+            ErrorPrinter("MKGRP","ERROR","-name","NULL,","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -name: Unique
+        DoublyGenericList*  grpList = getGroupsList();
+        GroupUserInfo* gu = newGrus();
+        int grpEx = grpExists(nwInf->_name,grpList);
+        if(grpEx > -1){
+            ErrorPrinter("MKGRP","ERROR","-name",nwInf->_name,"Este Grupo ya Existe");
+            return 1;
+        }
+
+        return 0;
+    }
     //RMGRP   ***************************************************************************************************** 
+    else if(strcasecmp(CMD,"RMGRP") == 0){
+        //(^< ............ ............ ............ ............ ............ root use only
+        if (strcasecmp(Omni->LoggedUser->UsrName,"root") != 0){
+            ErrorPrinter("RMGRP","ERROR","Usuario",Omni->LoggedUser->UsrName,"Solo root puede usar MKGRP");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -name: Mandatory
+        if(nwInf->_name == NULL){
+            ErrorPrinter("RMGRP","ERROR","-name","NULL,","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -name: Non-existent
+        DoublyGenericList*  grpList = getGroupsList();
+        GroupUserInfo* gu = newGrus();
+        int grpEx = grpExists(nwInf->_name,grpList);
+
+        if(grpEx == -1){
+            ErrorPrinter("RMGRP","ERROR","-name",nwInf->_name,"Este Grupo No Existe");
+            return 1;
+        }
+
+        return 0;
+    }
     //MKUSR   ***************************************************************************************************** 
+    else if(strcasecmp(CMD,"MKUSR") == 0){
+        //(^< ............ ............ ............ ............ ............ root use only
+        if (strcasecmp(Omni->LoggedUser->UsrName,"root") != 0){
+            ErrorPrinter("MKUSR","ERROR","Usuario",Omni->LoggedUser->UsrName,"Solo root puede usar MKUSR");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -usr: Mandatory
+        if(nwInf->_usr == NULL){
+            ErrorPrinter("MKUSR","ERROR","-usr","NULL,","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -pwd: Mandatory
+        if(nwInf->_pwd == NULL){
+            ErrorPrinter("MKUSR","ERROR","-pwd","NULL","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -grp: Mandatory
+        if(nwInf->_grp == NULL){
+            ErrorPrinter("MKUSR","ERROR","-grp","NULL,","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -usr: Unique
+        DoublyGenericList*  usrList = getUsersList();
+        GroupUserInfo* gu = newGrus();
+        int usrEx = usrExists(nwInf->_usr,usrList);
+
+        if(usrEx > -1){
+            ErrorPrinter("MKUSR","ERROR","-usr",nwInf->_usr,"Este Usuario ya Existe");
+            return 1;
+        }
+
+        return 0;
+
+    }
     //RMUSR   ***************************************************************************************************** 
+    else if(strcasecmp(CMD,"RMUSR") == 0){
+        //(^< ............ ............ ............ ............ ............ root use only
+        if (strcasecmp(Omni->LoggedUser->UsrName,"root") != 0){
+            ErrorPrinter("RMUSR","ERROR","Usuario",Omni->LoggedUser->UsrName,"Solo root puede usar RMUSR");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -usr: Mandatory
+        if(nwInf->_usr == NULL){
+            ErrorPrinter("RMUSR","ERROR","-usr","NULL,","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -usr: Non-existent
+        DoublyGenericList*  usrList = getUsersList();
+        GroupUserInfo* gu = newGrus();
+        int usrEx = usrExists(nwInf->_usr,usrList);
+
+        if(usrEx == -1){
+            ErrorPrinter("RMUSR","ERROR","-usr",nwInf->_usr,"Este Usuario No Existe");
+            return 1;
+        }
+
+        return 0;
+    }
+
     //CHMOD   ***************************************************************************************************** 
     //CAT   ******************************************************************************************************* 
     //REM   ******************************************************************************************************* 

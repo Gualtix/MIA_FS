@@ -991,8 +991,6 @@ void setOmni(char* mID){
     Omni->SBinuse = LoadSuperBlock(bt->StartByte);
 }
 
-
-
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ I N O D E
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1945,7 +1943,7 @@ int usrExists(char* Name,DoublyGenericList* Lst){
     int cnt = 0;
     while(cnt < Lm){
         GroupUserInfo* tmp = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(strcasecmp(Name,tmp->UsrName) == 0){
+        if(strcmp(Name,tmp->UsrName) == 0 && tmp->ID > 0){
             return cnt;
         }
         cnt++;
@@ -1959,7 +1957,7 @@ int grpExists(char* Name,DoublyGenericList* Lst){
     int cnt = 0;
     while(cnt < Lm){
         GroupUserInfo* tmp = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(strcasecmp(Name,tmp->GrpName) == 0){
+        if(strcmp(Name,tmp->GrpName) == 0 && tmp->ID > 0){
             return cnt;
         }
         cnt++;
@@ -2051,11 +2049,5 @@ void txtUsers_Update(DoublyGenericList*  grpList,DoublyGenericList*  usrList){
     EditFile("users.txt",tmp_3);
     //Write_txtFile("/home/wrm/Desktop/users_view.txt",tmp_3);
 }
-
-
-
-
-
-
 
 #endif // BELONG_H

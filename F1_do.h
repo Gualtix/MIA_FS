@@ -375,4 +375,86 @@ void login_do(InfoCatcher* nwInf){
     setOmni(nwInf->_id);
 }
 
+void mkgrp_do(InfoCatcher* nwInf){
+
+    DoublyGenericList*  grpList = getGroupsList();
+    DoublyGenericList*  usrList = getUsersList();
+    GroupUserInfo* gu = newGrus();
+
+    if(grpList != NULL){
+        gu->ID = grpList->Length + 1;
+        gu->Type = 'g';
+        gu->GrpName = nwInf->_name;
+    }
+    EnQueue(grpList,gu);
+    txtUsers_Update(grpList,usrList);
+}
+
+void rmgrp_do(InfoCatcher* nwInf){
+
+    DoublyGenericList*  grpList = getGroupsList();
+    DoublyGenericList*  usrList = getUsersList();
+
+    int Lm = grpList->Length;
+    int cnt = 0;
+    int found = 0;
+    while(cnt < Lm){
+        GroupUserInfo* tmp = (GroupUserInfo*)getNodebyIndex(grpList,cnt)->Dt;
+        if(strcasecmp(nwInf->_name,tmp->GrpName) == 0){
+            tmp->ID = 0;
+            found++;
+            break;
+        }
+        cnt++;
+    }
+
+    txtUsers_Update(grpList,usrList);
+
+    grpList = getGroupsList();
+    usrList = getUsersList();
+
+    int ask = 554;
+}
+
+void mkusr_do(InfoCatcher* nwInf){
+
+    DoublyGenericList*  grpList = getGroupsList();
+    DoublyGenericList*  usrList = getUsersList();
+    GroupUserInfo* gu = newGrus();
+
+    int grpEx = grpExists(nwInf->_grp,grpList);
+    int usrEx = usrExists(nwInf->_usr,usrList);
+
+    if(usrList != NULL){
+        gu->ID = usrList->Length + 1;
+        gu->Type = 'u';
+        gu->GrpName = nwInf->_grp;
+        gu->UsrName = nwInf->_usr;
+        gu->Password = nwInf->_pwd;
+    }
+
+    EnQueue(usrList,gu);
+    txtUsers_Update(grpList,usrList);
+}
+
+void rmusr_do(InfoCatcher* nwInf){
+
+    DoublyGenericList*  grpList = getGroupsList();
+    DoublyGenericList*  usrList = getUsersList();
+
+    int Lm = usrList->Length;
+    int cnt = 0;
+    int found = 0;
+    while(cnt < Lm){
+        GroupUserInfo* tmp = (GroupUserInfo*)getNodebyIndex(usrList,cnt)->Dt;
+        if(strcasecmp(nwInf->_usr,tmp->UsrName) == 0){
+            tmp->ID = 0;
+            found++;
+            break;
+        }
+        cnt++;
+    }
+    txtUsers_Update(grpList,usrList);
+}
+
 #endif // F1_DO_H

@@ -31,27 +31,27 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         Prm_Izq = (char*)DeQueue(CommandList);
         Prm_Der = (char*)DeQueue(CommandList);
 
-        if(strcmp(Prm_Izq,"-path") != 0){
+        if(strcasecmp(Prm_Izq,"-path") != 0 && strcasecmp(Prm_Izq,"-name") != 0 && strcasecmp(Prm_Izq,"-usr") != 0 && strcasecmp(Prm_Izq,"-pwd") != 0){
             if(Prm_Der != NULL){
                 String_ByRef_toLower(&Prm_Der);
             }
         }
 
         //(^< ............ ............ ............   _size
-        if(strcmp(Prm_Izq,"-size") == 0){
+        if(strcasecmp(Prm_Izq,"-size") == 0){
             int Nm = atoi(Prm_Der);
             (*nwInf)->_size =  atoi(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _fit
-        if(strcmp(Prm_Izq,"-fit") == 0){
+        if(strcasecmp(Prm_Izq,"-fit") == 0){
             (*nwInf)->_fit = newString(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _unit
-        if(strcmp(Prm_Izq,"-unit") == 0){
+        if(strcasecmp(Prm_Izq,"-unit") == 0){
             (*nwInf)->_unit = newString(Prm_Der);
             continue;
         }
@@ -63,32 +63,32 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         }
 
         //(^< ............ ............ ............   _type
-        if(strcmp(Prm_Izq,"-type") == 0){
+        if(strcasecmp(Prm_Izq,"-type") == 0){
             (*nwInf)->_type = newString(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _delete
-        if(strcmp(Prm_Izq,"-delete") == 0){
+        if(strcasecmp(Prm_Izq,"-delete") == 0){
             (*nwInf)->_delete = newString(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _add
-        if(strcmp(Prm_Izq,"-add") == 0){
+        if(strcasecmp(Prm_Izq,"-add") == 0){
             int Nm = atoi(Prm_Der);
             (*nwInf)->_add =  atoi(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _name
-        if(strcmp(Prm_Izq,"-name") == 0){
+        if(strcasecmp(Prm_Izq,"-name") == 0){
             (*nwInf)->_name = newString(Prm_Der);
             continue;
         }
 
         //(^< ............ ............ ............   _id
-        if(strcmp(Prm_Izq,"-id") == 0){
+        if(strcasecmp(Prm_Izq,"-id") == 0){
             (*nwInf)->_id = newString(Prm_Der);
             continue;
         }
@@ -105,9 +105,15 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
             continue;
         }
 
-        //(^< ............ ............ ............   _pws
+        //(^< ............ ............ ............   _pwd
         if(strcasecmp(Prm_Izq,"-pwd") == 0){
             (*nwInf)->_pwd = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _grp
+        if(strcasecmp(Prm_Izq,"-grp") == 0){
+            (*nwInf)->_grp= newString(Prm_Der);
             continue;
         }
 
@@ -644,12 +650,35 @@ void login_cmd(InfoCatcher* nwInf){
 }
 
 void mkgrp_cmd(InfoCatcher* nwInf){
-
-    if(nwInf->_grp == NULL){
-        //login_do(nwInf);
+    if(ErrorManager(nwInf,"MKGRP") == 0){
+        mkgrp_do(nwInf);
         printf("\n");
-        printf("MKGRP SUCCESS: Grupo   -> %s <-   Exitosamente\n",nwInf->_grp);
+        printf("MKGRP SUCCESS: Grupo   -> %s <-   Creado Exitosamente\n",nwInf->_name);
     } 
+}
+
+void rmgrp_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"RMGRP") == 0){
+        rmgrp_do(nwInf);
+        printf("\n");
+        printf("RMGRP SUCCESS: Grupo   -> %s <-   Eliminado Exitosamente\n",nwInf->_name);
+    } 
+}
+
+void mkusr_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"MKUSR") == 0){
+        mkusr_do(nwInf);
+        printf("\n");
+        printf("MKUSR SUCCESS: Usuario   -> %s <-   Creado Exitosamente\n",nwInf->_usr);
+    }
+}
+
+void rmusr_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"RMUSR") == 0){
+        rmusr_do(nwInf);
+        printf("\n");
+        printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
+    }
 }
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ P H A S E S
@@ -694,8 +723,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         mkfs_cmd(nwInf);
         return 0;
     }
-    else if (!strcasecmp(Bf, "login")){
-        login_cmd(nwInf);
+    else if (strcasecmp(Bf, "login") == 0){
         
         if(Omni->LoggedUser != NULL){
             printf("\n");
@@ -706,7 +734,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         
         return 0;
     }
-    else if (!strcasecmp(Bf, "logout")){
+    else if (strcasecmp(Bf, "logout") == 0){
 
         if(Omni->LoggedUser ==  NULL){
             printf("\n");
@@ -720,7 +748,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     
-    else if (!strcasecmp(Bf, "mkgrp")){
+    else if (strcasecmp(Bf, "mkgrp") == 0){
         if(Omni->LoggedUser ==  NULL){
             printf("\n");
             printf("MKGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
@@ -729,32 +757,36 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         mkgrp_cmd(nwInf);
         return 0;
     }
-    /*
-    else if (!strcasecmp(Bf, "rmgrp")){
-        int lg = is_it_Logged();
-        if(lg == 0){
+    
+    else if (strcasecmp(Bf, "rmgrp") == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("RMGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
-        rmgrp_cmd(CommandList);
-        return 0;
-    }
-    else if (!strcasecmp(Bf, "mkusr")){
-        int lg = is_it_Logged();
-        if(lg == 0){
-            return 0;
-        }
-        mkusr_cmd(CommandList);
-        return 0;
-    }
-    else if (!strcasecmp(Bf, "rmusr")){
-        int lg = is_it_Logged();
-        if(lg == 0){
-            return 0;
-        }
-        rmusr_cmd(CommandList);
+        rmgrp_cmd(nwInf);
         return 0;
     }
     
+    else if (strcasecmp(Bf, "mkusr") == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("RMGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            return 0;
+        }
+        mkusr_cmd(nwInf);
+        return 0;
+    }
+    else if (strcasecmp(Bf, "rmusr") == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("RMGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            return 0;
+        }
+        rmusr_cmd(nwInf);
+        return 0;
+    }
+    /*
     else if (!strcasecmp(Bf, "mkdir")){
         int lg = is_it_Logged();
         if(lg == 0){
@@ -868,7 +900,7 @@ void ExecuteComand(char *InputString){
         }
     }
     
-    //getchar();
+    getchar();
 }
 
 
