@@ -23,6 +23,10 @@ void AddSuper(FILE* DotFl,char* Color,char* TopTittle,int ColSpan){
     fprintf(DotFl,"\t\t\t\t\t\t<TR> <TD BGCOLOR = \"%s\" width = \"150\" colspan = \"%d\">- %s -<br/></TD></TR>\n",Color,ColSpan,TopTittle);
 }
 
+void AddTwinRow(FILE* DotFl,char* Type,char* Value,char* Color){
+    fprintf(DotFl,"\t\t\t\t\t\t<TR><TD BGCOLOR = \"%s\">%s</TD><TD BGCOLOR = \"%s\">%s</TD></TR>\n",Color,Type,Color,Value);
+}
+
 void AddRow(FILE* DotFl,char* Type,char* Value){
     fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>%s</TD><TD>%s</TD></TR>\n",Type,Value);
 }
@@ -349,8 +353,13 @@ void AddFolderBlock(FILE* DotFl,int StartByte){
     fprintf(DotFl,"\t\t\t[label =\n");
         fprintf(DotFl,"\t\t\t\t<\n");
             fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#ffb380\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
-                AddSuper(DotFl,"#ff660",Concat_Izq_with_Der(newString("FileBlock: "),tS,'s','s'),2);
+                AddSuper(DotFl,"#ff660",Concat_Izq_with_Der(newString("FolderBlock: "),tS,'s','s'),2);
 
+                AddTwinRow(DotFl,Tmp->b_content[0].b_name,toString(&Tmp->b_content[0].b_inodo,'i'),"#ffcc66");
+                AddTwinRow(DotFl,Tmp->b_content[1].b_name,toString(&Tmp->b_content[1].b_inodo,'i'),"#ffffff");
+                AddTwinRow(DotFl,Tmp->b_content[2].b_name,toString(&Tmp->b_content[2].b_inodo,'i'),"#ffcc66");
+                AddTwinRow(DotFl,Tmp->b_content[3].b_name,toString(&Tmp->b_content[3].b_inodo,'i'),"#ffffff");
+                /*
                 AddRow(DotFl,"name_0",Tmp->b_content[0].b_name);
                 sprintf(tS, "%d",Tmp->b_content[0].b_inodo);
                 AddRow(DotFl,"inodePtr_0",tS);
@@ -366,6 +375,7 @@ void AddFolderBlock(FILE* DotFl,int StartByte){
                 AddRow(DotFl,"name_3",Tmp->b_content[3].b_name);
                 sprintf(tS, "%d",Tmp->b_content[3].b_inodo);
                 AddRow(DotFl,"inodePtr_3",tS);
+                */
  
                 
             fprintf(DotFl,"\t\t\t\t\t</TABLE>\n");

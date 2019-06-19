@@ -93,6 +93,7 @@ SeekInfo* newSeekInfo(){
     SeekInfo* nwSI = (SeekInfo*)malloc(sizeof(SeekInfo));
 
     nwSI->FB_Bit_ID = -1;
+    nwSI->iNode_Bit_ID = -1;
     nwSI->FB_Index  = -1;
     nwSI->iCurent_Bit_ID = -1;
     nwSI->iNodeFather_Bit_ID = -1;

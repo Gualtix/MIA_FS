@@ -754,6 +754,13 @@ FileFolderInfo* get_FFInfo(InfoCatcher* nwInf){
     char* Name = Path_Get_FileName(newString(nwInf->_path));
     ffInf->PathPlacesList = PathSeparate(newString(nwInf->_path));
     ffInf->FileName = Name;
+
+    int i = 0;
+    while (i < ffInf->PathPlacesList->Length){
+        char* eer = (char*)getNodebyIndex(ffInf->PathPlacesList,i)->Dt;
+        i++;
+    }
+    
     
     if(nwInf->_R == 1 || nwInf->_P == 1){
         ffInf->isRecursive = 1;
@@ -1168,6 +1175,34 @@ SeekInfo* CompleteSeeker(int iNodeCurent_Bit_ID,char* FileName){
 //(^< ............ ............ ............ ............ ............ F O L D E R
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
+GroupUserInfo* getUSR_by_Name(char* Name,DoublyGenericList* Lst){
+
+    int cnt = 0;
+    while(cnt < Lst->Length){
+        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
+        if(strcasecmp(Name,gu->UsrName) == 0){
+            return gu;
+        }
+        cnt++;
+    }
+
+    return NULL;
+}
+
+GroupUserInfo* getGRP_by_Name(char* Name,DoublyGenericList* Lst){
+
+    int cnt = 0;
+    while(cnt < Lst->Length){
+        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
+        if(strcasecmp(Name,gu->GrpName) == 0){
+            return gu;
+        }
+        cnt++;
+    }
+
+    return NULL;
+}
+
 int Produce_newFolderBlock(FolderBlock* newStr,int iNodeFather_Bit_ID,int iNodeCurrent_Bit_ID){
     if(iNodeFather_Bit_ID > -1 && iNodeCurrent_Bit_ID > -1){
         strcpy(newStr->b_content[0].b_name,"iNodeFather");
@@ -1211,6 +1246,11 @@ int Produce_newInode_FolderType(int Permissions,int i_uid, int i_gid){
 }
 
 int iNode_FolderDirectCore(FolderBlock* tFB,int tPtr,int tFB_Index,int iNodeFather_Bit_ID,char* FolderName,int Permits,int i_uid, int i_gid){
+    
+    if(strcasecmp(FolderName,"fase2") == 0){
+        int asd = 85;
+    }
+
     // ------- ------- ------- New iNode_Folder   
     int nInodeFolder_Bit_ID = Produce_newInode_FolderType(Permits,i_uid,i_gid);
     Inode* nInodeFolder = (Inode*)BinLoad_Str(nInodeFolder_Bit_ID,"Inode");
@@ -1335,7 +1375,7 @@ int allocate_NewFolder(int iNodeFather_Bit_ID,char* FolderName,int Permits,int i
         else{
             // ------- ------- ------- New PointerBlock    
             PointerBlock* newPB = newPointerBlock();
-            int newPB_Bit_ID   = Produce_newPointerBlock(newPB);
+            int newPB_Bit_ID = Produce_newPointerBlock(newPB);
             // ------- ------- ------- ------- -------
 
             // ------- ------- ------- iNodeFather Linking & Update
@@ -1348,11 +1388,6 @@ int allocate_NewFolder(int iNodeFather_Bit_ID,char* FolderName,int Permits,int i
         cnt++;
     }
 
-}
-
-int make_newFolder(InfoCatcher* nwInf){
-    FileFolderInfo* ffInf = get_FFInfo(nwInf);
-    return 0;
 }
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1570,32 +1605,6 @@ int allocate_newFile(int iNode_Folder_Bit_ID,char* FileName,char* Content,int Pe
     
 }
 
-int make_newFile(InfoCatcher* nwInf){
-    FileFolderInfo* ffInf = get_FFInfo(nwInf);
-
-    if(nwInf->_cont == NULL){
-        if(nwInf->txtData == NULL){
-            nwInf->txtData = getDefault_txtContent(nwInf->_size);
-        }
-    }
-    else{
-        nwInf->txtData = getString_from_File(nwInf->_cont);
-        if(nwInf->txtData ==  NULL){
-            printf("\n");
-            printf("MKDIR -Cont ERROR: Archivo %s No Encontrado\n",nwInf->_cont);
-            return -1;
-        }
-    }
-
-    int DeepestFolder_Bit_ID = make_newFolder(nwInf);
-    if(DeepestFolder_Bit_ID > -1){
-        int newFile_Bit_ID = allocate_newFile(DeepestFolder_Bit_ID,ffInf->FileName,ffInf->txtData,664,0,0);
-        return newFile_Bit_ID;
-    }
-    return - 1;
-}
-
-
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ F O R M A T
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1667,73 +1676,6 @@ void Format_to_EXT3(){
     Full_PartFormat();
 
     UpdateSuperBlock();
-}
-
-void Load_Defaut_txt(InfoCatcher* nwInf){
-
-    int iN = Omni->SBinuse->s_inodes_count;
-    Inode* rt = newInode();
-
-    rt->i_uid  = 1;
-    rt->i_gid  = 1;
-    rt->i_size = 0;
-
-    //strcpy(rt->i_atime,getDateTime());
-    //strcpy(rt->i_ctime,getDateTime());
-    //strcpy(rt->i_mtime,getDateTime());
-
-    //Folder = 0
-    rt->i_type = 0;
-    rt->i_perm = 664;
-
-    //BitMap
-    int InodeID = getFirst_InodeBit_Free();
-    int BlockID = getFirst_BlockBit_Free();
-
-    //Linking
-    rt->i_block[0] = BlockID;
-
-    //I N O D E >>> Writing
-    InodeID = getFirst_InodeBit_Free();
-    int StartByte = Omni->SBinuse->s_inode_start + (InodeID * sizeof(Inode));
-    BinWrite_Struct(rt,InodeID,"Inode");
-
-
-    //(^< ............ ............ ............ ............ ............
-
-    FolderBlock* Fold_B = newFolderBlock();
-    
-    //Father Set
-    strcpy(Fold_B->b_content[0].b_name,"iNodeFather");
-    Fold_B->b_content[0].b_inodo = 0;
-    
-    //Current Set
-    strcpy(Fold_B->b_content[1].b_name,"iNodeCurent");
-    Fold_B->b_content[1].b_inodo = 0;
-
-    //Name Set
-    //strcpy(Fold_B->b_content[2].b_name,"users.txt");
-    //Fold_B->b_content[2].b_inodo = 1;
-    
-    //B L O C K >>> Writing
-    BlockID = getFirst_BlockBit_Free();
-    StartByte = Omni->SBinuse->s_block_start + (BlockID * sizeof(FolderBlock));
-    BinWrite_Struct(Fold_B,BlockID,"FolderBlock");
-
-    //(^< ............ ............ SuperBlock UPDATE
-    InodeID = getFirst_InodeBit_Free();
-    BlockID = getFirst_BlockBit_Free();
-    Omni->SBinuse->s_first_ino = InodeID;
-    Omni->SBinuse->s_first_blo = BlockID;
-    Omni->SBinuse->s_free_inodes_count = FreeInodeCounting(iN);
-    Omni->SBinuse->s_free_blocks_count = FreeBlockCounting(iN);
-    UpdateSuperBlock();
-
-    //(^< ............ ............ Default txt
-    nwInf->_path   = newString("/users.txt");
-    nwInf->txtData = newString("1,g,root\n1,U,root,root,123\n");
-    make_newFile(nwInf);
-
 }
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1916,6 +1858,107 @@ DoublyGenericList* getUsersList(){
     return NULL;
 }
 
+GroupUserInfo* getUSR_by_ID(int ID){
+
+    DoublyGenericList*  Lst = getUsersList();
+    int cnt = 0;
+    while(cnt < Lst->Length){
+        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
+        if(gu->ID == ID){
+            return gu;
+        }
+        cnt++;
+    }
+
+    return NULL;
+}
+
+GroupUserInfo* getGRP_by_ID(int ID){
+
+    DoublyGenericList*  Lst = getGroupsList();
+
+    int cnt = 0;
+    while(cnt < Lst->Length){
+        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
+        if(gu->ID == ID){
+            return gu;
+        }
+        cnt++;
+    }
+
+    return NULL;
+}
+
+int make_newFolder(InfoCatcher* nwInf){
+
+    FileFolderInfo* ffInf = get_FFInfo(nwInf);
+    
+    char* tName = (char*)DeQueue(ffInf->PathPlacesList);
+
+    if(strcasecmp(tName,"users.txt") == 0) return 0;
+
+    SeekInfo* nwSI = CompleteSeeker(0,tName);
+    int tmp = 0;
+
+    while(ffInf->PathPlacesList->Length > 0){
+        if(nwSI == NULL){
+            if(ffInf->isRecursive == 0){
+                int aspx = 0;
+                if(ffInf->PathPlacesList->Length > 1){
+                    printf("\n");
+                    printf("MKDIR -Path ERROR: La carpeta raiz   -> %s <-   no existe\n",tName);
+                    return -1;
+                }
+                //else{
+                //    int kasf = 5;
+                //}
+            }
+            GroupUserInfo* ggs = getGRP_by_Name(Omni->LoggedUser->GrpName,getGroupsList());
+            tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
+        }
+        else{
+            tmp = nwSI->iNode_Bit_ID;
+        }
+        tName = (char*)DeQueue(ffInf->PathPlacesList);
+        nwSI = CompleteSeeker(tmp,tName);
+
+    }
+
+    if(nwSI == NULL && strcasecmp(tName,"false") != 0 && strcasecmp(tName,"true")){
+        GroupUserInfo* ggs = getGRP_by_Name(Omni->LoggedUser->GrpName,getGroupsList());
+        tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
+    }
+
+    printf("\n");
+    printf("MKDIR SUCCESS: Arbol de Directorios   -> %s <-   Creado Exitosamente\n",nwInf->_path);
+    return tmp;
+}
+
+int make_newFile(InfoCatcher* nwInf){
+    FileFolderInfo* ffInf = get_FFInfo(nwInf);
+
+    if(nwInf->_cont == NULL){
+        if(nwInf->txtData == NULL){
+            nwInf->txtData = getDefault_txtContent(nwInf->_size);
+        }
+    }
+    else{
+        nwInf->txtData = getString_from_File(nwInf->_cont);
+        if(nwInf->txtData ==  NULL){
+            printf("\n");
+            printf("MKDIR -Cont ERROR: Archivo %s No Encontrado\n",nwInf->_cont);
+            return -1;
+        }
+    }
+
+    int DeepestFolder_Bit_ID = make_newFolder(nwInf);
+    if(DeepestFolder_Bit_ID > -1){
+        int newFile_Bit_ID = allocate_newFile(DeepestFolder_Bit_ID,ffInf->FileName,ffInf->txtData,664,0,0);
+        return newFile_Bit_ID;
+    }
+    return - 1;
+}
+
 char* UsersList_to_String(DoublyGenericList*  usrList){
     char* tmp = newString(25);
     int cnt = 0;
@@ -1984,64 +2027,73 @@ char* GroupsList_to_String(DoublyGenericList* grpList){
     return NULL;
 }
 
-GroupUserInfo* getUSR_by_ID(int ID){
+void Load_Defaut_txt(InfoCatcher* nwInf){
 
-    DoublyGenericList*  Lst = getUsersList();
-    int cnt = 0;
-    while(cnt < Lst->Length){
-        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(gu->ID == ID){
-            return gu;
-        }
-        cnt++;
-    }
+    int iN = Omni->SBinuse->s_inodes_count;
+    Inode* rt = newInode();
 
-    return NULL;
+    rt->i_uid  = 1;
+    rt->i_gid  = 1;
+    rt->i_size = 0;
+
+    //strcpy(rt->i_atime,getDateTime());
+    //strcpy(rt->i_ctime,getDateTime());
+    //strcpy(rt->i_mtime,getDateTime());
+
+    //Folder = 0
+    rt->i_type = 0;
+    rt->i_perm = 664;
+
+    //BitMap
+    int InodeID = getFirst_InodeBit_Free();
+    int BlockID = getFirst_BlockBit_Free();
+
+    //Linking
+    rt->i_block[0] = BlockID;
+
+    //I N O D E >>> Writing
+    InodeID = getFirst_InodeBit_Free();
+    int StartByte = Omni->SBinuse->s_inode_start + (InodeID * sizeof(Inode));
+    BinWrite_Struct(rt,InodeID,"Inode");
+
+
+    //(^< ............ ............ ............ ............ ............
+
+    FolderBlock* Fold_B = newFolderBlock();
+    
+    //Father Set
+    strcpy(Fold_B->b_content[0].b_name,"iNodeFather");
+    Fold_B->b_content[0].b_inodo = 0;
+    
+    //Current Set
+    strcpy(Fold_B->b_content[1].b_name,"iNodeCurent");
+    Fold_B->b_content[1].b_inodo = 0;
+
+    //Name Set
+    //strcpy(Fold_B->b_content[2].b_name,"users.txt");
+    //Fold_B->b_content[2].b_inodo = 1;
+    
+    //B L O C K >>> Writing
+    BlockID = getFirst_BlockBit_Free();
+    StartByte = Omni->SBinuse->s_block_start + (BlockID * sizeof(FolderBlock));
+    BinWrite_Struct(Fold_B,BlockID,"FolderBlock");
+
+    //(^< ............ ............ SuperBlock UPDATE
+    InodeID = getFirst_InodeBit_Free();
+    BlockID = getFirst_BlockBit_Free();
+    Omni->SBinuse->s_first_ino = InodeID;
+    Omni->SBinuse->s_first_blo = BlockID;
+    Omni->SBinuse->s_free_inodes_count = FreeInodeCounting(iN);
+    Omni->SBinuse->s_free_blocks_count = FreeBlockCounting(iN);
+    UpdateSuperBlock();
+
+    //(^< ............ ............ Default txt
+    nwInf->_path   = newString("/users.txt");
+    nwInf->txtData = newString("1,g,root\n1,U,root,root,123\n");
+    make_newFile(nwInf);
+
 }
 
-GroupUserInfo* getGRP_by_ID(int ID){
-
-    DoublyGenericList*  Lst = getGroupsList();
-
-    int cnt = 0;
-    while(cnt < Lst->Length){
-        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(gu->ID == ID){
-            return gu;
-        }
-        cnt++;
-    }
-
-    return NULL;
-}
-
-GroupUserInfo* getUSR_by_Name(char* Name,DoublyGenericList* Lst){
-
-    int cnt = 0;
-    while(cnt < Lst->Length){
-        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(strcasecmp(Name,gu->UsrName) == 0){
-            return gu;
-        }
-        cnt++;
-    }
-
-    return NULL;
-}
-
-GroupUserInfo* getGRP_by_Name(char* Name,DoublyGenericList* Lst){
-
-    int cnt = 0;
-    while(cnt < Lst->Length){
-        GroupUserInfo* gu = (GroupUserInfo*)getNodebyIndex(Lst,cnt)->Dt;
-        if(strcasecmp(Name,gu->GrpName) == 0){
-            return gu;
-        }
-        cnt++;
-    }
-
-    return NULL;
-}
 void txtUsers_Update(DoublyGenericList*  grpList,DoublyGenericList*  usrList){
     char* tmp   = GroupsList_to_String(grpList);
     char* tmp_2 = UsersList_to_String(usrList);

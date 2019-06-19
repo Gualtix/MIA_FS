@@ -457,4 +457,30 @@ void rmusr_do(InfoCatcher* nwInf){
     txtUsers_Update(grpList,usrList);
 }
 
+void mkdir_do(InfoCatcher* nwInf){
+    int Deepest_Bit_ID = make_newFolder(nwInf);
+}
+
+int mkfile_do(InfoCatcher* nwInf){
+    FileFolderInfo* ffInf = get_FFInfo(nwInf);
+    int Deepest_Bit_ID = make_newFolder(nwInf);
+    if(Deepest_Bit_ID > -1){
+        GroupUserInfo* ggs = getGRP_by_Name(Omni->LoggedUser->GrpName,getGroupsList());
+        int nwFL_Bit_ID = allocate_newFile(Deepest_Bit_ID,ffInf->FileName,ffInf->txtData,664,Omni->LoggedUser->ID,ggs->ID);
+        return nwFL_Bit_ID;
+    }
+    else{
+        return -1;
+    }
+
+}
+
+void rem_do(InfoCatcher* nwInf){
+
+}
+
+void rep_do(InfoCatcher* nwInf){
+    
+}
+
 #endif // F1_DO_H

@@ -212,9 +212,60 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     //CHMOD   ***************************************************************************************************** 
     //CAT   ******************************************************************************************************* 
     //REM   ******************************************************************************************************* 
+    else if(strcasecmp(CMD,"REM") == 0){
+
+    }
     //EDIT   ******************************************************************************************************
-    //REN   ******************************************************************************************************* 
-    //MKDIR   ***************************************************************************************************** 
+    //REN   *******************************************************************************************************
+    //MKFILE   ****************************************************************************************************
+    else if(strcasecmp(CMD,"MKFILE") == 0){
+        //(^< ............ ............ ............ ............ ............ -path: Mandatory
+        if(nwInf->_path == NULL){
+            ErrorPrinter("MKFILE","ERROR","-path","NULL","Es Obligatorio");
+            return 1;
+        }
+        char* FileName = Path_Get_FileName(nwInf->_path);
+
+        //(^< ............ ............ ............ ............ ............ -cont: Optional
+        if(nwInf->_cont != NULL){
+            char* txtData = getString_from_File(nwInf->_cont);
+            if(txtData == NULL){
+                ErrorPrinter("MKFILE","ERROR","-cont",nwInf->_cont,"Archivo No Encontrado");
+                return 1;
+            }
+            else{
+                nwInf->txtData = txtData;
+                return 0;
+            }
+        }
+
+        //(^< ............ ............ ............ ............ ............ -size: Optional
+        if(nwInf->_size <= 0){
+            ErrorPrinter("MKFILE","ERROR","-size",newString(nwInf->_size),"Valor Invalido");
+            return 1;
+        }
+        else{
+            char* txtData = getDefault_txtContent(nwInf->_size);
+            nwInf->txtData = txtData;
+            return 0;
+        }
+    } 
+    //MKDIR   *****************************************************************************************************
+    else if(strcasecmp(CMD,"MKDIR") == 0){
+        //(^< ............ ............ ............ ............ ............ -path: Unique
+        char* nwFolderName = Path_get_Last_FolderName(nwInf->_path);
+        SeekInfo* SF = CompleteSeeker(0,nwFolderName);
+        if(SF != NULL){
+            ErrorPrinter("MKDIR","ERROR","-path",nwFolderName,"Ya existe un Directorio con ese Nombre");
+            return 1;
+        }
+        //(^< ............ ............ ............ ............ ............ -path: Mandatory
+        if(nwInf->_path == NULL){
+            ErrorPrinter("MKDIR","ERROR","-path","NULL","Es Obligatorio");
+            return 1;
+        }
+        return 0;
+    }
     //CP   ********************************************************************************************************
     //MV   ********************************************************************************************************
     //FIND   ******************************************************************************************************

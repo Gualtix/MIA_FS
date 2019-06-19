@@ -680,6 +680,46 @@ void rmusr_cmd(InfoCatcher* nwInf){
         printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
     }
 }
+
+void mkdir_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"MKDIR") == 0){
+        mkdir_do(nwInf);
+        //char* FolderName = Path_get_Last_FolderName(nwInf->_path);
+        //printf("\n");
+        //printf("MKDIR SUCCESS: Directorio   -> %s <-   Creado Exitosamente\n",FolderName); 
+    }
+}
+
+void mkfile_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"MKFILE") == 0){
+        mkfile_do(nwInf);
+        char* FileName = Path_Get_FileName(nwInf->_path);
+        printf("\n");
+        printf("MKFILE SUCCESS: Archivo   -> %s <-   Creado Exitosamente\n",FileName); 
+    }
+}
+
+void rem_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"REM") == 0){
+        rem_do(nwInf);
+        char* FolderName = Path_Get_FileName(nwInf->_path);
+        printf("\n");
+        printf("REM SUCCESS: Directorio   -> %s <-   Eliminado Exitosamente\n",FolderName); 
+    }
+}
+
+/*
+void rep_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"REP") == 0){
+        rep_do(nwInf);
+        char* FolderName = Path_Get_FileName(nwInf->_path);
+        printf("\n");
+        printf("REP SUCCESS: Reporte   -> %s <-   Generado Exitosamente\n",FolderName); 
+    }
+}
+*/
+
+
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ P H A S E S
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -711,6 +751,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     else if(strcasecmp(Bf, "pause") == 0){
+        FullViewRender("/home/wrm/Desktop/Todito.dot","tree"); 
         getchar();
         return 0;
     }
@@ -747,7 +788,6 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         printf("LOGOUT SUCCESS: Sesion Cerrada Exitosamente...\n");
         return 0;
     }
-    
     else if (strcasecmp(Bf, "mkgrp") == 0){
         if(Omni->LoggedUser ==  NULL){
             printf("\n");
@@ -771,7 +811,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
     else if (strcasecmp(Bf, "mkusr") == 0){
         if(Omni->LoggedUser ==  NULL){
             printf("\n");
-            printf("RMGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            printf("MKUSR ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
         mkusr_cmd(nwInf);
@@ -780,40 +820,47 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
     else if (strcasecmp(Bf, "rmusr") == 0){
         if(Omni->LoggedUser ==  NULL){
             printf("\n");
-            printf("RMGRP ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            printf("RMUSR ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
         rmusr_cmd(nwInf);
         return 0;
     }
-    /*
+    
     else if (!strcasecmp(Bf, "mkdir")){
-        int lg = is_it_Logged();
-        if(lg == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("MKDIR ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
-        mkdir_cmd(CommandList);
+        mkdir_cmd(nwInf);
         return 0;
     }
     else if (!strcasecmp(Bf, "mkfile")){
-        int lg = is_it_Logged();
-        if(lg == 0){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("MKFILE ERROR: No Hay Ninguna Sesion Iniciada...\n");
             return 0;
         }
-        mkfile_cmd(CommandList);
+        mkfile_cmd(nwInf);
         return 0;
     }
     else if (!strcasecmp(Bf, "rep")){
-        rep_cmd(CommandList);
-        return 0;
-    }
-    else if (!strcasecmp(Bf, "rem")){
-        rem_cmd(CommandList);
+        rep_cmd(nwInf);
         return 0;
     }
     
-    return 1;
-    */
+    else if (!strcasecmp(Bf, "rem")){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("REN ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            return 0;
+        }
+        rem_cmd(nwInf);
+        return 0;
+    }
+
+
 
    return 1;
 }
@@ -823,8 +870,8 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 void ExecuteComand(char *InputString){
 
-    system("clear");
-    printf("\n");
+    //system("clear");
+    AppDiv();
     printf("CommandLine->   %s\n",InputString);
 
     if (*(InputString) == '\n'){
@@ -898,9 +945,11 @@ void ExecuteComand(char *InputString){
             printf("\n");
             printf("Analizer ERROR: Comando: %s No Reconocido\n", Main_CMD);
         }
-    }
-    
-    getchar();
+    }   
+
+    AppDiv();
+    Div2();
+    //getchar();
 }
 
 

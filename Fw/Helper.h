@@ -17,6 +17,13 @@
 #define Mega (Kilo * 1024)
 
 
+void AppDiv(){
+    printf("--------------------------------------------------------------------------------------------------------------------------------------------------\n");
+}
+
+void Div2(){
+    printf("//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////\n");
+}
 
 char* getDateTime(){
     time_t Tmp = time(0);
@@ -25,6 +32,7 @@ char* getDateTime(){
     char* Dt = newString(&ShapeDate[0]);
     return Dt;
 }
+
 
 DoublyGenericList* PathSeparate(char* CompletePathDir){
 
@@ -55,6 +63,7 @@ DoublyGenericList* PathSeparate(char* CompletePathDir){
     return PathList;
 }
 
+
 char* Path_Get_Isolated(char* CompletePathDir){
 
     DoublyGenericList* PathList = PathSeparate(CompletePathDir);
@@ -78,6 +87,27 @@ char* Path_Get_Isolated(char* CompletePathDir){
         return CompletePathDir;
     }
 
+}
+
+char* Path_get_Last_FolderName(char* CompletePathDir){
+    DoublyGenericList* PathList = PathSeparate(CompletePathDir);
+    
+    char* Op = (char*)Pop(PathList);
+    char* Path;
+    char* FileName;
+
+    if(strcmp(Op,"true") == 0){
+        FileName = (char*)Pop(PathList);
+        return FileName;
+    }
+
+    if(strcmp(Op,"false") == 0){
+        Op = NULL;
+        if(PathList->Length > 0){
+            Op = (char*)Pop(PathList);
+        }
+        return Op;
+    }
 }
 
 char* Path_Get_FileName(char* CompletePathDir){
