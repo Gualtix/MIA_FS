@@ -31,7 +31,7 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         Prm_Izq = (char*)DeQueue(CommandList);
         Prm_Der = (char*)DeQueue(CommandList);
 
-        if(strcasecmp(Prm_Izq,"-path") != 0 && strcasecmp(Prm_Izq,"-name") != 0 && strcasecmp(Prm_Izq,"-usr") != 0 && strcasecmp(Prm_Izq,"-pwd") != 0){
+        if(strcasecmp(Prm_Izq,"-path") != 0 && strcasecmp(Prm_Izq,"-name") != 0 && strcasecmp(Prm_Izq,"-usr") != 0 && strcasecmp(Prm_Izq,"-pwd") != 0 && strcasecmp(Prm_Izq,"-cont") != 0){
             if(Prm_Der != NULL){
                 String_ByRef_toLower(&Prm_Der);
             }
@@ -130,6 +130,12 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
         if(!strcasecmp(Prm_Izq,"-R")){
             (*nwInf)->_R = 1;
             FrontInsert(CommandList,Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _cont
+        if(!strcasecmp(Prm_Izq,"-cont")){
+            (*nwInf)->_cont = newString(Prm_Der);
             continue;
         }
 

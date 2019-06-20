@@ -241,7 +241,7 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
 
         //(^< ............ ............ ............ ............ ............ -size: Optional
         if(nwInf->_size <= 0){
-            ErrorPrinter("MKFILE","ERROR","-size",newString(nwInf->_size),"Valor Invalido");
+            ErrorPrinter("MKFILE","ERROR","-size","Menor a Cero","Valor Invalido");
             return 1;
         }
         else{

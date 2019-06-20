@@ -1452,19 +1452,23 @@ int place_at_newFile(int FatherFolderBLock_Bit_ID,int FolderBlock_Pos,char* File
             FileBlock* FB_temp = newFileBlock();
             strcpy(FB_temp->b_content,tS);
 
+            /*
             if(strcasecmp(FileName,"users.txt") == 0){
                 FolderBlock* Tmp = (FolderBlock*)BinLoad_Str(2,"FolderBlock");
                 int asdf = 5;
             }
+            */
 
             int FB_tmp_Bit_ID = getFirst_BlockBit_Free();
             //int FB_tmp_StartByte = Bit_to_StartByte(FB_tmp_Bit_ID,"Block");
             BinWrite_Struct(FB_temp,FB_tmp_Bit_ID,"FileBlock");
 
+            /*
             if(strcasecmp(FileName,"users.txt") == 0){
                 FolderBlock* Tmp = (FolderBlock*)BinLoad_Str(2,"FolderBlock");
                 int asdf = 5;
             }
+            */
 
             
             

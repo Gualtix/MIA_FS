@@ -247,7 +247,6 @@ DoublyGenericList* getSubstring_64CharList(char* Content){
     while(cnt < nB){
         char* str = newString(Base);
     
-        //memset(str,'\0',sizeof(char) * Base);
         int i = 0;
         while(i < Base){
             str[i] = Content[ptr];
@@ -255,11 +254,9 @@ DoublyGenericList* getSubstring_64CharList(char* Content){
             ptr++;
         }
 
-        //str[63] = '\0';
         EnQueue(Ls,str);
         cnt++;
     }
-
 
     if(nR > 0){
 

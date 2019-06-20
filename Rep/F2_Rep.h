@@ -309,6 +309,7 @@ void AddFileBlock(FILE* DotFl,int StartByte){
             fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#ffe066\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
                 AddSuper(DotFl,"#ffcc00",Concat_Izq_with_Der(newString("FileBlock: "),tS,'s','s'),2);
 
+                /*
                 char Clone[64];
                 memset(Clone,'\0',64);
 
@@ -332,8 +333,9 @@ void AddFileBlock(FILE* DotFl,int StartByte){
                     }
                     i++;
                 }
+                */
                 
-                AddRow(DotFl,"b_content",Clone);
+                AddRow(DotFl,"b_content",&Tmp->b_content[0]);
 
             fprintf(DotFl,"\t\t\t\t\t</TABLE>\n");
         fprintf(DotFl,"\t\t\t\t>\n");
