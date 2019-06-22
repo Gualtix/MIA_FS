@@ -477,10 +477,50 @@ int mkfile_do(InfoCatcher* nwInf){
 
 void rem_do(InfoCatcher* nwInf){
 
+    
 }
 
-void rep_do(InfoCatcher* nwInf){
-    
+void rep_F1_do(InfoCatcher* nwInf){
+
+    char* tmp = nwInf->_path;
+    int ln = strlen(tmp);
+    tmp[ln - 1] = 't';
+    tmp[ln - 2] = 'o';
+    tmp[ln - 3] = 'd';
+
+    char* RepName = Path_Get_FileName(newString(nwInf->_path));
+    char* RepPath = Path_Get_Isolated(newString(nwInf->_path));
+
+    Locat* lcat = vdTransform(nwInf->_id);
+    char*  Disk_Dir = UsingDisk_List[lcat->Letter].CompletePathDir;
+
+    if(strcasecmp(nwInf->_name,"mbr") == 0){
+        Generate_MBR_Report(Disk_Dir,RepPath,RepName);
+        printf("\n");
+        printf("REP SUCCESS: Reporte MBR   -> %s <-   Generado con Exito\n",RepName);
+    }
+    else if(strcasecmp(nwInf->_name,"disk") == 0){
+        GenerateDiskRender(Disk_Dir,RepPath,RepName);
+        printf("\n");
+        printf("REP SUCCESS: Reporte DISK   -> %s <-   Generado con Exito\n",RepName);
+    }
+    else{
+        printf("\n");
+        printf("REP ERROR: Parametro -name   -> %s <-   No Valido\n",nwInf->_name);
+        return;
+    }
+}
+
+void rep_F2_do(InfoCatcher* nwInf){
+    setOmni(nwInf->_id);
+    if(strcasecmp(nwInf->_name,"file") == 0){
+        Generate_File_Rep(nwInf->_path,nwInf->_ruta);
+        Omni = newGLS();
+        return;
+    }
+    FullViewRender(newString(nwInf->_path),nwInf->_name);
+    Omni = newGLS();
+
 }
 
 #endif // F1_DO_H

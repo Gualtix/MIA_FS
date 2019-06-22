@@ -187,6 +187,25 @@ int CreatePathDir(char* Path){
     return Validate_If_Path_Exists(Path)? 1:0;
 }
 
+int Check_If_Is_txtFile(char* Name){
+
+    int Ln = strlen(Name);
+
+    if(Name[Ln - 1] != 't'){
+        return 0;
+    }
+    if(Name[Ln - 2] != 'x'){
+        return 0;
+    }
+    if(Name[Ln - 3] != 't'){
+        return 0;
+    }
+    if(Name[Ln - 4] != '.'){
+        return 0;
+    }
+    return 1;
+}
+
 char* Write_txtFile(char* Path, char* Content){
     FILE* Fl = fopen(Path,"w");
     if(Fl){
@@ -281,6 +300,54 @@ DoublyGenericList* getSubstring_64CharList(char* Content){
     }
 
     return NULL;
+}
+
+
+char* get_DotExt_Path(char* Path){
+
+    char* DotPath = newString(Path);
+
+    char* Type   = newString("dot");
+    int ln = strlen(DotPath);
+
+    DotPath[ln - 1] = Type[2];
+    DotPath[ln - 2] = Type[1];
+    DotPath[ln - 3] = Type[0];
+
+    return DotPath;
+    
+}
+
+void Generate_TypeFile_Rep(char* CompleteReportPathDir){
+
+    char* DotPath = get_DotExt_Path(CompleteReportPathDir);
+
+    char* Type = newString(3);
+    int ln = strlen(CompleteReportPathDir);
+
+    Type[2] = CompleteReportPathDir[ln - 1];
+    Type[1] = CompleteReportPathDir[ln - 2];
+    Type[0] = CompleteReportPathDir[ln - 3];
+
+    char* alt = newString(15);
+    
+    if(strcasecmp(Type,"png")== 0){
+        alt = newString("dot -Tpng ");
+        alt = Concat_Izq_with_Der(alt,DotPath,'s','s');
+        alt = Concat_Izq_with_Der(alt,newString(" "),'s','s');
+        alt = Concat_Izq_with_Der(alt,newString(" -o "),'s','s');
+        alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+    }
+
+    if(strcasecmp(Type,"pdf")== 0){
+        alt = newString("dot -Tpdf ");
+        alt = Concat_Izq_with_Der(alt,DotPath,'s','s');
+        alt = Concat_Izq_with_Der(alt,newString(" "),'s','s');
+        alt = Concat_Izq_with_Der(alt,newString(" -o "),'s','s');
+        alt = Concat_Izq_with_Der(alt,CompleteReportPathDir,'s','s');
+    }
+
+    system(alt);
 }
 
 

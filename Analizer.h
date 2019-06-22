@@ -139,6 +139,12 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
             continue;
         }
 
+        //(^< ............ ............ ............   _cont
+        if(!strcasecmp(Prm_Izq,"-ruta")){
+            (*nwInf)->_ruta = newString(Prm_Der);
+            continue;
+        }
+
         /*
         if(strcasecmp(Prm_Izq,"-path") && strcasecmp(Prm_Izq,"-cont")){
             if(Prm_Der != NULL){
@@ -514,41 +520,16 @@ void f_disk_cmd(InfoCatcher* nwInf){
 }
 
 void rep_cmd(InfoCatcher* nwInf){
-    //rep –id~:~vda1 -Path~:~/home/user/reports/reporte1.jpg -name~:~mbr
-    Mounted_Part* mP = getPartMounted_By_vID(nwInf->_id);
-    
-    if(mP == NULL){
+    if(ErrorManager(nwInf,"REP") == 0){
+        if(strcasecmp(nwInf->_name,"mbr") != 0 && strcasecmp(nwInf->_name,"disk") != 0){
+            rep_F2_do(nwInf);
+        }
+        else{
+            rep_F1_do(nwInf);
+        }
+        char* RepName = Path_Get_FileName(nwInf->_path);
         printf("\n");
-        printf("REP ERROR: El ID de Montaje   -> %s <-   No Existe\n",nwInf->_id);
-        return;
-    } 
-
-    char* tmp = nwInf->_path;
-    int ln = strlen(tmp);
-    tmp[ln - 1] = 't';
-    tmp[ln - 2] = 'o';
-    tmp[ln - 3] = 'd';
-
-    char* RepName = Path_Get_FileName(newString(nwInf->_path));
-    char* RepPath = Path_Get_Isolated(newString(nwInf->_path));
-
-    Locat* lcat = vdTransform(nwInf->_id);
-    char*  Disk_Dir = UsingDisk_List[lcat->Letter].CompletePathDir;
-
-    if(strcasecmp(nwInf->_name,"mbr") == 0){
-        Generate_MBR_Report(Disk_Dir,RepPath,RepName);
-        printf("\n");
-        printf("REP SUCCESS: Reporte DISK   -> %s <-   Generado con Exito\n",RepName);
-    }
-    else if(strcasecmp(nwInf->_name,"disk") == 0){
-        GenerateDiskRender(Disk_Dir,RepPath,RepName);
-        printf("\n");
-        printf("REP SUCCESS: Reporte DISK   -> %s <-   Generado con Exito\n",RepName);
-    }
-    else{
-        printf("\n");
-        printf("REP ERROR: Parametro -name   -> %s <-   No Valido\n",nwInf->_name);
-        return;
+        printf("REP SUCCESS: Reporte:   -> %s <-   Generado con Exito\n",RepName);
     }
 }
 
@@ -757,7 +738,7 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     else if(strcasecmp(Bf, "pause") == 0){
-        FullViewRender("/home/wrm/Desktop/Todito.dot","tree"); 
+        //FullViewRender("/home/wrm/Desktop/Todito.dot","tree"); 
         getchar();
         return 0;
     }

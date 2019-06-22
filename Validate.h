@@ -9,16 +9,16 @@ void ErrorPrinter(char* CMD,char* MsgType,char* ParamName,char* ParamValue,char*
     printf("%s %s: Parametro: %s   Valor:   -> %s <-   %s\n",CMD,MsgType,ParamName,ParamValue,Msg);
 }
 
-int _id_Val(char* _id){
+int _id_Val(char* CMD,char* _id){
     //(^< ............ ............ ............ ............ ............ -id: Mandatory
     if(_id ==  NULL){
-        ErrorPrinter("MKFS","ERROR","-id","NULL","Es Obligatorio");
+        ErrorPrinter(CMD,"ERROR","-id","NULL","Es Obligatorio");
         return 1;
     }
     else{
         Mounted_Part* mP = getPartMounted_By_vID(_id);
         if(mP == NULL){
-            ErrorPrinter("MKFS","ERROR","-id",_id,"No es una Particion Montada");
+            ErrorPrinter(CMD,"ERROR","-id",_id,"No es una Particion Montada");
             return 1;
         }
     }
@@ -30,7 +30,7 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     //MKFS   ****************************************************************************************************** 
     if(strcasecmp(CMD,"MKFS") == 0){
         //(^< ............ ............ ............ ............ ............ -id: Mandatory
-        if(_id_Val(nwInf->_id) == 1) return 1;
+        if(_id_Val("MKFS",nwInf->_id) == 1) return 1;
         
         //(^< ............ ............ ............ ............ ............ -type: Optional
         if(nwInf->_type == NULL){
@@ -55,7 +55,7 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         }
 
         //(^< ............ ............ ............ ............ ............ -id: Mandatory
-        if(_id_Val(nwInf->_id) == 1) return 1;
+        if(_id_Val("LOGIN",nwInf->_id) == 1) return 1;
 
         //(^< ............ ............ ............ ............ ............ -usr: Mandatory
         if(nwInf->_usr == NULL){
@@ -273,6 +273,41 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     //CHGRP   *****************************************************************************************************
     //MV   ********************************************************************************************************
     //REP   *******************************************************************************************************
+    else if(strcasecmp(CMD,"REP") == 0){
+
+        //(^< ............ ............ ............ ............ ............ -id: Mandatory
+        if(_id_Val("REP",nwInf->_id) == 1) return 1;
+
+        //(^< ............ ............ ............ ............ ............ -name: Mandatory
+        if(nwInf->_name == NULL){
+            ErrorPrinter("REP","ERROR","-name","NULL","Es Obligatorio");
+            return 1;
+        }
+
+        //(^< ............ ............ ............ ............ ............ -path: Mandatory
+        if(nwInf->_path == NULL){
+            ErrorPrinter("REP","ERROR","-path","NULL","Es Obligatorio");
+            return 1;
+        }
+        //(^< ............ ............ ............ ............ ............ -ruta: Mandatory
+        if(strcasecmp(nwInf->_name,"ls") != 0 && strcasecmp(nwInf->_name,"file") != 0){
+            return 0;
+        }
+        if(nwInf->_ruta == NULL && strcasecmp(nwInf->_name,"mbr") != 0 && strcasecmp(nwInf->_name,"disk") != 0){
+            ErrorPrinter("REP","ERROR","-ruta","NULL","Es Obligatorio");
+            return 1;
+        }
+        if(strcasecmp(nwInf->_name,"file") == 0){
+            char* FileName = Path_get_Last_FolderName(nwInf->_ruta);
+            setOmni(nwInf->_id);
+            SeekInfo* SF = CompleteSeeker(0,FileName);
+            Omni = newGLS();
+            if(SF == NULL){
+                ErrorPrinter("REP","ERROR","-ruta",FileName,"El Archivo No Existe");
+                return 1;
+            }
+        }
+    }
     return 0;
 }
 

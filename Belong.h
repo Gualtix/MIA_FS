@@ -848,6 +848,7 @@ void BinWriteUpdate_InodeBit(char Op,int Bit_ID){
     
     fclose(Fl);
 }
+
 void* BinLoad_Str(int Bit_ID,char* StrType){
 
     int StartByte = -1;
@@ -885,6 +886,12 @@ void* BinLoad_Str(int Bit_ID,char* StrType){
             fread(Point_B,sizeof(PointerBlock),1, Fl);
             fclose(Fl);
             return Point_B;
+        }
+        else if(strcasecmp(StrType,"Journaling") == 0){
+            Journaling* Jr = newJournaling();
+            fread(Jr,sizeof(Journaling),1, Fl);
+            fclose(Fl);
+            return Jr;
         }
         else{
             fclose(Fl);
@@ -949,6 +956,10 @@ int BinWrite_Struct(void* Str,int Bit_ID,char* StrType){
             int StartByte = Omni->SBinuse->s_bm_block_start + Bit_ID;
             fseek(Fl,StartByte,SEEK_SET);
             fwrite(&ch,sizeof(char),1,Fl);
+        }
+        else if(strcasecmp(StrType,"Journaling") == 0){
+            Journaling* Jr = (Journaling*)Str;
+            fwrite(Jr,sizeof(Journaling),1,Fl);
         }
         else{
             fclose(Fl);
@@ -1420,6 +1431,10 @@ int fill_FilePointerBlock(DoublyGenericList** List_64_Char){
 
 int place_at_newFile(int FatherFolderBLock_Bit_ID,int FolderBlock_Pos,char* FileName,char* Content, int Permits,int i_uid,int i_gid){
     // ******* Father FolderBlock *******
+    if(strcasecmp(FileName,"Alaska.txt") == 0){
+        int ksm = 0;
+        int ksme = 0;
+    }
     int FatherFolderBlock_StartByte = Bit_to_StartByte(FatherFolderBLock_Bit_ID,"Block");
     FolderBlock* FatherFolderBlock  = (FolderBlock*)BinLoad_Str(FatherFolderBLock_Bit_ID,"FolderBlock");
 
@@ -1913,12 +1928,15 @@ int make_newFolder(InfoCatcher* nwInf){
                     printf("MKDIR -Path ERROR: La carpeta raiz   -> %s <-   no existe\n",tName);
                     return -1;
                 }
-                //else{
-                //    int kasf = 5;
-                //}
             }
             GroupUserInfo* ggs = getGRP_by_Name(Omni->LoggedUser->GrpName,getGroupsList());
-            tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
+            int Op = Check_If_Is_txtFile(tName);
+            if(Op == 0){
+                tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
+            }
+            else{
+
+            }
         }
         else{
             tmp = nwSI->iNode_Bit_ID;
@@ -1928,8 +1946,11 @@ int make_newFolder(InfoCatcher* nwInf){
 
     }
 
+    
+
     if(nwSI == NULL && strcasecmp(tName,"false") != 0 && strcasecmp(tName,"true")){
         GroupUserInfo* ggs = getGRP_by_Name(Omni->LoggedUser->GrpName,getGroupsList());
+        
         tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
     }
 

@@ -24,15 +24,18 @@ FileFolderInfo* newFileFolderInfo(){
 }
 
 typedef struct Journaling{
-    int journal_tipo_operacion;
-    int journal_tipo;
-    int journal_nombre;
-    int journal_contenido;
-    int journal_fecha;
-    int journal_propietario;
-    int journal_permisos;
-
+    int  Start_Byte_Available;
+    int  Occupied;
+    char CommandLine[350];
+    char Date;
 }Journaling;
+
+Journaling* newJournaling(){
+    Journaling* Jr = (Journaling*)malloc(sizeof(Journaling));
+    Jr->Start_Byte_Available = 0;
+    Jr->Occupied = 0;
+    return Jr;
+}
 
 
 

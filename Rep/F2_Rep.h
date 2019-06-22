@@ -308,32 +308,6 @@ void AddFileBlock(FILE* DotFl,int StartByte){
         fprintf(DotFl,"\t\t\t\t<\n");
             fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#ffe066\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
                 AddSuper(DotFl,"#ffcc00",Concat_Izq_with_Der(newString("FileBlock: "),tS,'s','s'),2);
-
-                /*
-                char Clone[64];
-                memset(Clone,'\0',64);
-
-                int i = 0;
-                int index = 0;
-                while(i < 64){
-                    char w = Tmp->b_content[i];
-                    int r = isalnum(w); 
-                    if(r > 0 || w == ','){
-                        Clone[index] = w;
-                        index++;
-                    }
-                    else{
-                        if(w == '\0'){
-                            Clone[index] = w;
-                            index++;
-                            break;
-                        }
-                        int ad = 0;
-                        int sdfas = 5;
-                    }
-                    i++;
-                }
-                */
                 
                 AddRow(DotFl,"b_content",&Tmp->b_content[0]);
 
@@ -735,8 +709,8 @@ void txt_InodeBitMap(char* CompleteReportPathDir){
     int cnt = 0;
     int Fp  = 0;
    
-    char txtContent[500000];
-    memset(txtContent,'\0',500000);
+    char txtContent[900000];
+    memset(txtContent,'\0',900000);
     
     
     while(cnt < iN){
@@ -791,10 +765,14 @@ void txt_BlockBitMap(char* CompleteReportPathDir){
     int cnt = 0;
     int Fp  = 0;
 
-    int Tot = (3 * iN);
+    //int Tot = (3 * iN) * 3;
    
-    char txtContent[Tot];
-    memset(txtContent,'\0',Tot);
+    //char txtContent[Tot];
+    //char* txtContent = newString(Tot);
+    //memset(txtContent,'\0',Tot);
+
+    char txtContent[900000];
+    memset(txtContent,'\0',900000);
     
     while(cnt < (3 * iN)){
 
@@ -978,39 +956,54 @@ void LsRep(char* CompleteReportPathDir,char* Name,char* Type){
     
 }
 
-//void FullViewRender(char* CompletePathDir,char* ReportPath,char* ReportName,int iN){
-void FullViewRender(char* CompleteReportPathDir,char* Type){
-   
-    int iN = Calc_iN(Omni->PartBatch_inUse->Size);
+void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
 
-    /*
-    if(Usr_inUse->SBinuse->s_filesystem_type == 3){
-        iN = Usr_inUse->Ext3_iN;
-    }
-    else{
-        iN = Usr_inUse->Ext2_iN;
-    }
-    */
+}
 
-    //(^< ............ ............ ............   D I S K   L O A D
-    //MBR* Disk = LoadMBR(CompletePathDir_inUse);
+void Generate_File_Rep(char* CompleteReportPathDir,char* _ruta){
 
-
-
-    //(^< ............ ............ ............   R E P O R T
     char* ReportName = Path_Get_FileName(CompleteReportPathDir);
     char* ReportPath = Path_Get_Isolated(CompleteReportPathDir);
 
-    int LsNm = strlen(ReportName);
-    ReportName[LsNm - 1] = 't';
-    ReportName[LsNm - 2] = 'o';
-    ReportName[LsNm - 3] = 'd';
+    char* iName = Path_Get_FileName(_ruta);
 
     CreatePathDir(ReportPath);
-
-    CompleteReportPathDir = Concat_Izq_with_Der(ReportPath,ReportName,'s','s');
+    char* txtContent = ReadFile(iName);
     
-    FILE* DotFl = fopen(CompleteReportPathDir,"w+");
+    Write_txtFile(CompleteReportPathDir,txtContent);
+}
+
+void Generate_Journaling(FILE* DotFl,int jStartByte){
+
+}
+
+void FullViewRender(char* CompleteReportPathDir,char* Type){
+
+    //(^< ............ ............ ...........   InodeBitMap
+    if(strcasecmp(Type,"bm_inode") == 0){
+        txt_InodeBitMap(CompleteReportPathDir);
+        //inodeBitMapDot(DotFl,iN);
+        return;
+    }
+
+    //(^< ............ ............ ...........   BlockBitMap
+    if(strcasecmp(Type,"bm_block") == 0){
+        txt_BlockBitMap(CompleteReportPathDir);
+        //blockBitMapDot(DotFl,iN);
+        return;
+    }
+
+    char* DotPath = get_DotExt_Path(CompleteReportPathDir);
+    int iN = Calc_iN(Omni->PartBatch_inUse->Size);
+
+    //(^< ............ ............ ............   R E P O R T
+    
+    char* ReportName = Path_Get_FileName(CompleteReportPathDir);
+    char* ReportPath = Path_Get_Isolated(CompleteReportPathDir);
+
+    CreatePathDir(ReportPath);
+    
+    FILE* DotFl = fopen(DotPath,"w+");
 
     //(^< ............ ............ ...........   D O T   F I L E
     if(DotFl){
@@ -1025,43 +1018,34 @@ void FullViewRender(char* CompleteReportPathDir,char* Type){
         if(strcasecmp(Type,"sb") == 0){
             SuperBlockDot(DotFl);
         }
-        
-
+    
         //(^< ............ ............ ...........   Journaling
         if(strcasecmp(Type,"journaling") == 0){
-            int StartByte = Bit_to_StartByte(0,"journaling");
-
+            int jStart = Omni->SBinuse->s_block_start + sizeof(SuperBlock);
+            Journaling* Jr = (Journaling*)BinLoad_Str(jStart,"Journaling");
+            Generate_Journaling(DotFl,jStart);
         }
 
         //(^< ............ ............ ...........   FileSystemTree
         if(strcasecmp(Type,"tree") == 0){
             int StartByte = Bit_to_StartByte(0,"Inode");
-            FileSystemTree(DotFl,StartByte);
-            //(^< ............ ............ ...........   inodeBitMap
-            //inodeBitMapDot(DotFl,iN);
-
-            //(^< ............ ............ ...........   blockBitMap
-            //blockBitMapDot(DotFl,iN);
+            FileSystemTree(DotFl,StartByte);            
         }
 
         //(^< ............ ............ ...........   InodeOnlyDot
         if(strcasecmp(Type,"inode") == 0){
-            
             InodeOnlyDot(DotFl,iN);
         }
         
         //(^< ............ ............ ...........   BlockOnlyDot
         if(strcasecmp(Type,"block") == 0){
-            
             BlockOnlyDot(DotFl,iN);
         }
 
         fprintf(DotFl,"\t\t}\n");
         fprintf(DotFl,"}\n");
         fclose(DotFl);
-        char* Tmp = newString("xdg-open ");
-        Tmp = Concat_Izq_with_Der(Tmp,CompleteReportPathDir,'s','s');
-        system(Tmp);
+        Generate_TypeFile_Rep(CompleteReportPathDir);
     }
 }
 
