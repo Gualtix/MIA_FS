@@ -1214,13 +1214,13 @@ GroupUserInfo* getGRP_by_Name(char* Name,DoublyGenericList* Lst){
     return NULL;
 }
 
-int Produce_newFolderBlock(FolderBlock* newStr,int iNodeFather_Bit_ID,int iNodeCurrent_Bit_ID){
-    if(iNodeFather_Bit_ID > -1 && iNodeCurrent_Bit_ID > -1){
+int Produce_newFolderBlock(FolderBlock* newStr,int iNodeFather_Bit_ID,int iNodeCurent_Bit_ID){
+    if(iNodeFather_Bit_ID > -1 && iNodeCurent_Bit_ID > -1){
         strcpy(newStr->b_content[0].b_name,"iNodeFather");
         newStr->b_content[0].b_inodo = iNodeFather_Bit_ID;
 
         strcpy(newStr->b_content[1].b_name,"iNodeCurent");
-        newStr->b_content[1].b_inodo = iNodeCurrent_Bit_ID;
+        newStr->b_content[1].b_inodo = iNodeCurent_Bit_ID;
     }
     int newStr_Bit_ID = getFirst_BlockBit_Free();
     BinWrite_Struct(newStr,newStr_Bit_ID,"FolderBlock");
@@ -1701,7 +1701,6 @@ void Format_to_EXT3(){
 //(^< ............ ............ ............ ............ ............ L O G I N
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-
 int EraseFile(char* FileName){
     SeekInfo* nwSI = CompleteSeeker(0,FileName);
 
@@ -1750,44 +1749,84 @@ int EraseFile(char* FileName){
     return -1;
 }
 
-int EraseFolder(char* FolderName){
-    SeekInfo* nsk = CompleteSeeker(0,FolderName);
-
-
-}
-
-void CompleteTraversal(int iNode_Bit_ID){
+void CompleteTraversal_to_Erase(int iNode_Bit_ID){
     Inode* i_Node = (Inode*)BinLoad_Str(iNode_Bit_ID,"Inode");
 
     int i = 0;
     while (i < 12){
-        if(i_Node->i_block[i] == -1) continue;
+        if(i_Node->i_block[i] == -1) {i++; continue;}
+
         int FB_Bit_ID = i_Node->i_block[i];
         FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+
         int j = 0;
         while (j < 4){
-            if(FolderB->b_content[j].b_inodo == -1) continue;
+            if(FolderB->b_content[j].b_inodo == -1) {j++; continue;}
             
-            Inode* next_i_Node = (Inode*)BinLoad_Str(iNode_Bit_ID,"Inode");
+            int next_i_Node_Bit_ID = FolderB->b_content[j].b_inodo;
+            Inode* next_i_Node = (Inode*)BinLoad_Str(next_i_Node_Bit_ID,"Inode");
 
             int isFolder  = !next_i_Node->i_type; 
             int isCurrent = strcasecmp(FolderB->b_content[j].b_name,"iNodeFather");
             int isFather  = strcasecmp(FolderB->b_content[j].b_name,"iNodeCurent");
             
             if(isFolder && isCurrent != 0 && isFather != 0){
-
+                CompleteTraversal_to_Erase(next_i_Node_Bit_ID);
             }
-            
+            else{
+                if(isFolder == 0){
+                    char* FileName = FolderB->b_content[j].b_name;
+                    EraseFile(FileName);
+                }
+            }
             j++;
         }
         i++;
     }
 
     while (i < 15){
-        if(i_Node->i_block[i] == -1) continue;
+        if(i_Node->i_block[i] == -1) {i++; continue;};
+
+        int PB_Bit_ID = i_Node->i_block[i];
+        PointerBlock* PointerB = (PointerBlock*)BinLoad_Str(PB_Bit_ID,"PointerBlock");
+
+        int j = 0;
+        while (j < 16){
+            if(PointerB->b_pointers[j] == -1) {j++; continue;}
+
+            int FB_Bit_ID = i_Node->i_block[i];
+            FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+
+            int k = 0;
+            while (k < 4){
+                if(FolderB->b_content[k].b_inodo == -1){k++; continue;}
+                
+                int next_i_Node_Bit_ID = FolderB->b_content[k].b_inodo;
+                Inode* next_i_Node = (Inode*)BinLoad_Str(next_i_Node_Bit_ID,"Inode");
+
+                int isFolder  = !next_i_Node->i_type; 
+                int isCurrent = strcasecmp(FolderB->b_content[k].b_name,"iNodeFather");
+                int isFather  = strcasecmp(FolderB->b_content[k].b_name,"iNodeCurent");
+                
+                if(isFolder && isCurrent != 0 && isFather != 0){
+                    CompleteTraversal_to_Erase(next_i_Node_Bit_ID);
+                }
+                 else{
+                    if(isFolder == 0){
+                        char* FileName = FolderB->b_content[k].b_name;
+                        EraseFile(FileName);
+                    }
+                }
+                k++;
+            }
+        }
         i++;
     }
-    
+}
+
+int EraseFolder(char* FolderName){
+    SeekInfo* nsk = CompleteSeeker(0,FolderName);
+    CompleteTraversal_to_Erase(nsk->iNode_Bit_ID);
 }
 
 char* ReadFile(char* FileName){

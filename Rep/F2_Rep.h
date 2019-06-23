@@ -519,7 +519,7 @@ void FileSystemTree(FILE* DotFl,int StartByte){
                         int SuperNext_StartByte = Bit_to_StartByte(SuperNext_ID_Bit,"Inode");
                         char* SuperNextName = getGraphStructName("Inode",SuperNext_ID_Bit);
 
-                        if(SuperNext_ID_Bit > 0 && strcasecmp(iName,"iNodeFather") != 0 && strcasecmp(iName,"iNodeCurrent")){
+                        if(SuperNext_ID_Bit > 0 && strcasecmp(iName,"iNodeFather") != 0 && strcasecmp(iName,"iNodeCurent")){
                             //Next Linking
                             AddLink(DotFl,NextName,SuperNextName);
                             FileSystemTree(DotFl,SuperNext_StartByte);
