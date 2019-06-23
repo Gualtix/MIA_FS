@@ -9,9 +9,11 @@
 typedef struct FileFolderInfo
 {
     DoublyGenericList* PathPlacesList;
-    int isRecursive;
+    int   isRecursive;
+    char* FatherName;
     char* FileName;
     char* txtData;
+
 }FileFolderInfo;
 
 FileFolderInfo* newFileFolderInfo(){
@@ -20,6 +22,8 @@ FileFolderInfo* newFileFolderInfo(){
     Rs->PathPlacesList = new_DoublyGenericList();
     Rs->isRecursive    = 0;
     Rs->FileName       = NULL;
+
+    return Rs;
 
 }
 

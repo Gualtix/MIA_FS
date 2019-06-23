@@ -9,6 +9,7 @@
 
 int main()
 {
+    //Check_If_FullPath_Exists("/home/wrm/Desktop/Alaska.txt");
     newLine_Flag = 0;
     cmdString    = NULL;
 

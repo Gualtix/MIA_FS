@@ -475,9 +475,13 @@ int mkfile_do(InfoCatcher* nwInf){
 
 }
 
-void rem_do(InfoCatcher* nwInf){
-
-    
+void rem_do(char* tmp,int istxt){
+    if(istxt == 1){
+        EraseFile(tmp);
+    }
+    else{
+        EraseFolder(tmp);
+    }
 }
 
 void rep_F1_do(InfoCatcher* nwInf){

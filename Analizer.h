@@ -688,10 +688,21 @@ void mkfile_cmd(InfoCatcher* nwInf){
 
 void rem_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"REM") == 0){
-        rem_do(nwInf);
-        char* FolderName = Path_Get_FileName(nwInf->_path);
-        printf("\n");
-        printf("REM SUCCESS: Directorio   -> %s <-   Eliminado Exitosamente\n",FolderName); 
+        
+
+        DoublyGenericList* Ph = PathSeparate(nwInf->_path);
+        Pop(Ph);
+        char* tmp = (char*)Pop(Ph);
+        int  istxt = Check_If_Is_txtFile(tmp);
+       rem_do(tmp,istxt);
+        if(istxt == 1){
+            printf("\n");
+            printf("REM SUCCESS: Archivo   -> %s <-   Eliminado Exitosamente\n",tmp); 
+        }
+        else{
+            printf("\n");
+            printf("REM SUCCESS: Folder   -> %s <-   Eliminado Exitosamente\n",tmp); 
+        }
     }
 }
 
@@ -738,7 +749,6 @@ int ScanF1(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
     else if(strcasecmp(Bf, "pause") == 0){
-        //FullViewRender("/home/wrm/Desktop/Todito.dot","tree"); 
         getchar();
         return 0;
     }

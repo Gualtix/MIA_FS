@@ -25,6 +25,29 @@ int _id_Val(char* CMD,char* _id){
     return 0;
 }
 
+
+/*
+int Check_If_FullPath_Exists(char* Path){
+    DoublyGenericList* PathList = PathSeparate(Path);
+    int i = 0;
+    int ptr = 0;
+    while (i < PathList->Length){
+        char* tmp = (char*)(getNodebyIndex(PathList,i)->Dt);
+        SeekInfo* sk = CompleteSeeker(ptr,tmp);
+        int isFile = Check_If_Is_txtFile(tmp);
+        int isTrueFalse = (strcasecmp(tmp,"true") == 0 || strcasecmp(tmp,"false") == 0);
+        if(sk == NULL && isTrueFalse == 0){
+            return 0;
+        }
+        else{
+            ptr = sk->iNode_Bit_ID;
+        }
+        i++;
+    }
+    return 1;
+}
+*/
+
 int ErrorManager(InfoCatcher* nwInf,char* CMD){
     // 0 = No Error
     //MKFS   ****************************************************************************************************** 
@@ -213,7 +236,28 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     //CAT   ******************************************************************************************************* 
     //REM   ******************************************************************************************************* 
     else if(strcasecmp(CMD,"REM") == 0){
-
+        //(^< ............ ............ ............ ............ ............ -path: Mandatory
+        if(nwInf->_path == NULL){
+            ErrorPrinter("REM","ERROR","-path","NULL","Es Obligatorio");
+            return 1;
+        }
+        //(^< ............ ............ ............ ............ ............ -path: Unique
+        DoublyGenericList* Ph = PathSeparate(nwInf->_path);
+        Pop(Ph);
+        char* tmp = (char*)Pop(Ph);
+        int  istxt = Check_If_Is_txtFile(tmp);
+        SeekInfo* SF = CompleteSeeker(0,tmp);
+        if(SF == NULL){
+            if(istxt == 1){
+                ErrorPrinter("REM","ERROR","-path",tmp,"El Archivo No Existe");
+                return 1;
+            }
+            else{
+                ErrorPrinter("REM","ERROR","-path",tmp,"El Folder No Existe");
+                return 1;
+            }
+        }
+        return 0;
     }
     //EDIT   ******************************************************************************************************
     //REN   *******************************************************************************************************
@@ -311,8 +355,6 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
     return 0;
 }
 
-int Validate_MKFS(InfoCatcher* nwInf){
 
-}
 
 #endif // VALIDATE_H

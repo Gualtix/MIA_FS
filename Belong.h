@@ -1750,6 +1750,46 @@ int EraseFile(char* FileName){
     return -1;
 }
 
+int EraseFolder(char* FolderName){
+    SeekInfo* nsk = CompleteSeeker(0,FolderName);
+
+
+}
+
+void CompleteTraversal(int iNode_Bit_ID){
+    Inode* i_Node = (Inode*)BinLoad_Str(iNode_Bit_ID,"Inode");
+
+    int i = 0;
+    while (i < 12){
+        if(i_Node->i_block[i] == -1) continue;
+        int FB_Bit_ID = i_Node->i_block[i];
+        FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+        int j = 0;
+        while (j < 4){
+            if(FolderB->b_content[j].b_inodo == -1) continue;
+            
+            Inode* next_i_Node = (Inode*)BinLoad_Str(iNode_Bit_ID,"Inode");
+
+            int isFolder  = !next_i_Node->i_type; 
+            int isCurrent = strcasecmp(FolderB->b_content[j].b_name,"iNodeFather");
+            int isFather  = strcasecmp(FolderB->b_content[j].b_name,"iNodeCurent");
+            
+            if(isFolder && isCurrent != 0 && isFather != 0){
+
+            }
+            
+            j++;
+        }
+        i++;
+    }
+
+    while (i < 15){
+        if(i_Node->i_block[i] == -1) continue;
+        i++;
+    }
+    
+}
+
 char* ReadFile(char* FileName){
 
     SeekInfo* nwSI = CompleteSeeker(0,FileName);
