@@ -9,7 +9,7 @@
 char* newString(int Ln){
     // +1 for '\0' character
     char* Str = (char*) malloc((Ln + 1) * sizeof(char)); 
-    memset(Str,'^',Ln);
+    memset(Str,'\0',Ln);
     Str[Ln] = '\0';
     return Str;
 }

@@ -522,6 +522,11 @@ void rep_F2_do(InfoCatcher* nwInf){
         Omni = newGLS();
         return;
     }
+    if(strcasecmp(nwInf->_name,"ls") == 0){
+        Generate_Ls_Rep(nwInf->_path,nwInf->_ruta);
+        Omni = newGLS();
+        return;
+    }
     FullViewRender(newString(nwInf->_path),nwInf->_name);
     Omni = newGLS();
 

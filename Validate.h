@@ -341,6 +341,7 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
             ErrorPrinter("REP","ERROR","-ruta","NULL","Es Obligatorio");
             return 1;
         }
+
         if(strcasecmp(nwInf->_name,"file") == 0){
             char* FileName = Path_get_Last_FolderName(nwInf->_ruta);
             setOmni(nwInf->_id);
@@ -350,6 +351,28 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
                 ErrorPrinter("REP","ERROR","-ruta",FileName,"El Archivo No Existe");
                 return 1;
             }
+        }
+
+        if(strcasecmp(nwInf->_name,"ls") == 0){
+
+            DoublyGenericList* Ph = PathSeparate(nwInf->_ruta);
+            Pop(Ph);
+            char* tmp = (char*)Pop(Ph);
+            int  istxt = Check_If_Is_txtFile(tmp);
+            setOmni(nwInf->_id);
+            SeekInfo* SF = CompleteSeeker(0,tmp);
+            Omni = newGLS();
+            if(SF == NULL){
+                if(istxt == 1){
+                    ErrorPrinter("REP","ERROR","-ruta",tmp,"El Archivo No Existe");
+                    return 1;
+                }
+                else{
+                    ErrorPrinter("REP","ERROR","-ruta",tmp,"El Folder No Existe");
+                    return 1;
+                }
+            }
+            return 0;
         }
     }
     return 0;

@@ -1701,6 +1701,8 @@ void Format_to_EXT3(){
 //(^< ............ ............ ............ ............ ............ L O G I N
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
+
+
 int EraseFile(char* FileName){
     SeekInfo* nwSI = CompleteSeeker(0,FileName);
 
@@ -1749,7 +1751,44 @@ int EraseFile(char* FileName){
     return -1;
 }
 
-void CompleteTraversal_to_Erase(int iNode_Bit_ID){
+
+void Release_Folder(int Bit_ID,char* Name){
+    if(strcasecmp(Name,"/") == 0){
+        int kks = 56;
+    }
+    SeekInfo* nsk = CompleteSeeker(0,Name);
+
+    if(nsk == NULL){
+        int ess = 5;
+        return;
+    }
+
+    //Inodo del Folder
+    Inode* i_Node = (Inode*)BinLoad_Str(Bit_ID,"Inode");
+    
+    //Bloque Vacio
+    int FolderB_Bit_ID = i_Node->i_block[0]; 
+    FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FolderB_Bit_ID,"FolderBlock");
+
+
+    //Liberar Nombre
+    int Father_Bit_ID = nsk->FB_Bit_ID;
+    FolderBlock* Father = (FolderBlock*)BinLoad_Str(Father_Bit_ID,"FolderBlock");
+    Father->b_content[nsk->FB_Index].b_inodo = -1;
+    memset(Father->b_content[nsk->FB_Index].b_name,'\0',12);
+    
+    //Binary Update
+    BinWrite_Struct(newFolderBlock(),FolderB_Bit_ID,"FolderBlock");
+    BinWriteUpdate_BlockBit('0',FolderB_Bit_ID);
+
+    BinWrite_Struct(newInode(),Bit_ID,"Inode");
+    BinWriteUpdate_InodeBit('0',Bit_ID);
+
+    BinWrite_Struct(Father,Father_Bit_ID,"FolderBlock");
+}
+
+
+void CompleteTraversal_to_Erase(int iNode_Bit_ID,char* FatherFolderName){
     Inode* i_Node = (Inode*)BinLoad_Str(iNode_Bit_ID,"Inode");
 
     int i = 0;
@@ -1760,9 +1799,11 @@ void CompleteTraversal_to_Erase(int iNode_Bit_ID){
         FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
 
         int j = 0;
+        int Empty = 0;
         while (j < 4){
-            if(FolderB->b_content[j].b_inodo == -1) {j++; continue;}
-            
+            //Carpeta no Vacia solo con Empty carpeta4
+            if(FolderB->b_content[j].b_inodo == -1) {Empty++; j++; continue;}
+
             int next_i_Node_Bit_ID = FolderB->b_content[j].b_inodo;
             Inode* next_i_Node = (Inode*)BinLoad_Str(next_i_Node_Bit_ID,"Inode");
 
@@ -1771,7 +1812,9 @@ void CompleteTraversal_to_Erase(int iNode_Bit_ID){
             int isFather  = strcasecmp(FolderB->b_content[j].b_name,"iNodeCurent");
             
             if(isFolder && isCurrent != 0 && isFather != 0){
-                CompleteTraversal_to_Erase(next_i_Node_Bit_ID);
+                int aspfss = 5;
+                FatherFolderName = FolderB->b_content[j].b_name;
+                CompleteTraversal_to_Erase(next_i_Node_Bit_ID,FatherFolderName);
             }
             else{
                 if(isFolder == 0){
@@ -1780,6 +1823,13 @@ void CompleteTraversal_to_Erase(int iNode_Bit_ID){
                 }
             }
             j++;
+        }
+        //Folder Delete
+        if(Empty == 2){
+            int asp = 8;
+            int asep = 8;
+            Release_Folder(iNode_Bit_ID,FatherFolderName);
+            Empty = 0;
         }
         i++;
     }
@@ -1809,7 +1859,7 @@ void CompleteTraversal_to_Erase(int iNode_Bit_ID){
                 int isFather  = strcasecmp(FolderB->b_content[k].b_name,"iNodeCurent");
                 
                 if(isFolder && isCurrent != 0 && isFather != 0){
-                    CompleteTraversal_to_Erase(next_i_Node_Bit_ID);
+                    CompleteTraversal_to_Erase(next_i_Node_Bit_ID,FatherFolderName);
                 }
                  else{
                     if(isFolder == 0){
@@ -1824,9 +1874,17 @@ void CompleteTraversal_to_Erase(int iNode_Bit_ID){
     }
 }
 
+
 int EraseFolder(char* FolderName){
     SeekInfo* nsk = CompleteSeeker(0,FolderName);
-    CompleteTraversal_to_Erase(nsk->iNode_Bit_ID);
+    CompleteTraversal_to_Erase(nsk->iNode_Bit_ID,"/");
+    //Liberar Nombre
+    FolderBlock* Father = (FolderBlock*)BinLoad_Str(nsk->FB_Bit_ID,"FolderBlock");
+    Father->b_content[nsk->FB_Index].b_inodo = -1;
+    memset(Father->b_content[nsk->FB_Index].b_name,'\0',12);
+    
+    BinWrite_Struct(Father,nsk->FB_Bit_ID,"FolderBlock");
+
 }
 
 char* ReadFile(char* FileName){

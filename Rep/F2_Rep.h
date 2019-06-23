@@ -854,10 +854,32 @@ char* getPermitString(int Perm){
     return Cmp;
 }
 
+void Add_LsRow(FILE* DotFl,int Bit_ID,char* Type,char* Name){
+
+    Inode* tmp = (Inode*)BinLoad_Str(Bit_ID,"Inode");
+    char* Permision = getPermitString(tmp->i_perm);
+    GroupUserInfo* Usr = getUSR_by_ID(tmp->i_uid);
+    GroupUserInfo* Grp = getGRP_by_ID(tmp->i_gid);
+    char* Owner = newString(Usr->UsrName);
+    char* Group = newString(Usr->GrpName);
+
+    char* Size_in_Bytes = newString(25);
+    sprintf(Size_in_Bytes,"%d",tmp->i_size);
+
+    char* Date = newString(25);
+    sprintf(Date,"%d",tmp->i_mtime);
+    fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>%s</TD><TD>%s</TD><TD>%s</TD><TD>%s</TD><TD>%s</TD><TD>%s</TD><TD>%s</TD></TR>\n",Permision,Owner,Group,Size_in_Bytes,Date,Type,Name);
+}
+
+
+/*
 DoublyGenericList* getFolderContent_Tour(char* Name){
     SeekInfo* iNode = CompleteSeeker(0,Name);
 }
+*/
 
+
+/*
 void LsRep(char* CompleteReportPathDir,char* Name,char* Type){
 
     
@@ -955,9 +977,144 @@ void LsRep(char* CompleteReportPathDir,char* Name,char* Type){
     }
     
 }
+*/
+
+
+void LsTravel(FILE* DotFl,int Bit_ID){
+    Inode* i_Node = (Inode*)BinLoad_Str(Bit_ID,"Inode");
+
+    int i = 0;
+    while (i < 12){
+        if(i_Node->i_block[i] == -1) {i++; continue;}
+
+        int FB_Bit_ID = i_Node->i_block[i];
+        FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+
+        int j = 0;
+        int Empty = 0;
+        while (j < 4){
+            //Carpeta no Vacia solo con Empty carpeta4
+            if(FolderB->b_content[j].b_inodo == -1) {Empty++; j++; continue;}
+
+            int next_i_Node_Bit_ID = FolderB->b_content[j].b_inodo;
+            char* tName = FolderB->b_content[j].b_name;
+            Inode* next_i_Node = (Inode*)BinLoad_Str(next_i_Node_Bit_ID,"Inode");
+
+            int isFolder  = !next_i_Node->i_type; 
+            int isCurrent = strcasecmp(FolderB->b_content[j].b_name,"iNodeFather");
+            int isFather  = strcasecmp(FolderB->b_content[j].b_name,"iNodeCurent");
+            
+            if(isFolder && isCurrent != 0 && isFather != 0){
+                //Folder
+                LsTravel(DotFl,next_i_Node_Bit_ID);
+                Add_LsRow(DotFl,next_i_Node_Bit_ID,"Folder",tName);
+            }
+            else{
+                //File
+                if(isFolder == 0){
+                    Add_LsRow(DotFl,next_i_Node_Bit_ID,"Archivo",tName);
+                }
+            }
+            j++;
+        }
+        i++;
+    }
+
+
+
+    while (i < 15){
+        /*
+        if(i_Node->i_block[i] == -1) {i++; continue;};
+
+        int PB_Bit_ID = i_Node->i_block[i];
+        PointerBlock* PointerB = (PointerBlock*)BinLoad_Str(PB_Bit_ID,"PointerBlock");
+
+        int j = 0;
+        while (j < 16){
+            if(PointerB->b_pointers[j] == -1) {j++; continue;}
+
+            int FB_Bit_ID = i_Node->i_block[i];
+            FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+
+            int k = 0;
+            while (k < 4){
+                if(FolderB->b_content[k].b_inodo == -1){k++; continue;}
+                
+                int next_i_Node_Bit_ID = FolderB->b_content[k].b_inodo;
+                char* tName = FolderB->b_content[k].b_name;
+                Inode* next_i_Node = (Inode*)BinLoad_Str(next_i_Node_Bit_ID,"Inode");
+
+                int isFolder  = !next_i_Node->i_type; 
+                int isCurrent = strcasecmp(FolderB->b_content[k].b_name,"iNodeFather");
+                int isFather  = strcasecmp(FolderB->b_content[k].b_name,"iNodeCurent");
+                
+                if(isFolder && isCurrent != 0 && isFather != 0){
+                    //Folder
+                    LsTravel(DotFl,next_i_Node_Bit_ID);
+                    Add_LsRow(DotFl,next_i_Node_Bit_ID,"Folder",tName);
+                }
+                 else{
+                     //File
+                    if(isFolder == 0){
+                        Add_LsRow(DotFl,next_i_Node_Bit_ID,"Archivo",tName);
+                    }
+                }
+                k++;
+            }
+            j++;
+        }
+        */
+        i++;
+    }
+}
 
 void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
 
+    DoublyGenericList* Ph = PathSeparate(_ruta);
+    Pop(Ph);
+    char* Name = (char*)Pop(Ph);
+   
+    char* DotPath = get_DotExt_Path(CompleteReportPathDir);
+    int iN = Calc_iN(Omni->PartBatch_inUse->Size);
+
+    //(^< ............ ............ ............   R E P O R T
+    
+    char* ReportName = Path_Get_FileName(CompleteReportPathDir);
+    char* ReportPath = Path_Get_Isolated(CompleteReportPathDir);
+
+    CreatePathDir(ReportPath);
+    
+    FILE* DotFl = fopen(DotPath,"w+");
+
+    //(^< ............ ............ ...........   D O T   F I L E
+    if(DotFl){
+        fprintf(DotFl,"digraph FullView {\n");
+        fprintf(DotFl,"\trankdir = LR;\n");
+        fprintf(DotFl,"\tnode [shape = plaintext];\n");
+        fprintf(DotFl,"\t\tsubgraph cluster_OutLook {\n");
+        fprintf(DotFl,"\t\t\tlabel = \"LS Report :: FileSystem\";\n");
+        fprintf(DotFl,"\t\t\tgraph[style = dotted];\n");
+
+        //(^< ............ ............ ...........   Ls
+        fprintf(DotFl,"\t\tLs_Report\n");
+        fprintf(DotFl,"\t\t\t[label =\n");
+            fprintf(DotFl,"\t\t\t\t<\n");
+                fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#99c2ff\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
+
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Permision</TD><TD>Owner</TD><TD>Group</TD><TD>Size_in_Bytes</TD><TD>Date</TD><TD>Type</TD><TD>Name</TD></TR>\n");
+                SeekInfo* nsk = CompleteSeeker(0,Name);
+                LsTravel(DotFl,nsk->iNode_Bit_ID);
+                fprintf(DotFl,"\t\t\t\t\t</TABLE>\n");
+            fprintf(DotFl,"\t\t\t\t>\n");
+        fprintf(DotFl,"\t\t\t]\n");
+
+        
+
+        fprintf(DotFl,"\t\t}\n");
+        fprintf(DotFl,"}\n");
+        fclose(DotFl);
+        //Generate_TypeFile_Rep(CompleteReportPathDir);
+    }
 }
 
 void Generate_File_Rep(char* CompleteReportPathDir,char* _ruta){
@@ -1045,7 +1202,7 @@ void FullViewRender(char* CompleteReportPathDir,char* Type){
         fprintf(DotFl,"\t\t}\n");
         fprintf(DotFl,"}\n");
         fclose(DotFl);
-        Generate_TypeFile_Rep(CompleteReportPathDir);
+        //Generate_TypeFile_Rep(CompleteReportPathDir);
     }
 }
 
