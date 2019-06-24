@@ -1675,18 +1675,18 @@ int allocate_newFile(int iNode_Folder_Bit_ID,char* FileName,char* Content,int Pe
 //(^< ............ ............ ............ ............ ............ F O R M A T
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-/*
+
 void Add_FirstDefault_Journaling(){
-    //int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
-    //BinWrite_Struct(newJournaling(),Jr_Start_Byte,"Journaling");
+    int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+    BinWrite_Struct(newJournaling(),Jr_Start_Byte,"Journaling");
 }
+
 
 void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
 
-    /*
     char Tp = '0';
     if(strcasecmp(Type,"Archivo")){
-        Tp = 1;
+        Tp = '1';
     }
 
     Journaling* Jr = newJournaling();
@@ -1725,7 +1725,7 @@ void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
     
    
 }
-*/
+
 
 void Fast_PartFormat(){
     clear_blockBits();
@@ -1794,7 +1794,7 @@ void Format_to_EXT3(){
 
     UpdateSuperBlock();
 
-    //Add_FirstDefault_Journaling();
+    Add_FirstDefault_Journaling();
 }
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............

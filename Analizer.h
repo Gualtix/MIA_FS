@@ -644,7 +644,7 @@ void login_cmd(InfoCatcher* nwInf){
 
 void mkgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKGRP") == 0){
-        //AddJournal("mkgrp",COMMS,664,"users.txt","Archivo");
+        AddJournal("mkgrp",COMMS,664,"users.txt","Archivo");
         mkgrp_do(nwInf);
         printf("\n");
         printf("MKGRP SUCCESS: Grupo   -> %s <-   Creado Exitosamente\n",nwInf->_name);
@@ -653,7 +653,7 @@ void mkgrp_cmd(InfoCatcher* nwInf){
 
 void rmgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMGRP") == 0){
-        //AddJournal("rmgrp",COMMS,664,"users.txt","Archivo");
+        AddJournal("rmgrp",COMMS,664,"users.txt","Archivo");
         rmgrp_do(nwInf);
         printf("\n");
         printf("RMGRP SUCCESS: Grupo   -> %s <-   Eliminado Exitosamente\n",nwInf->_name);
@@ -662,7 +662,7 @@ void rmgrp_cmd(InfoCatcher* nwInf){
 
 void mkusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKUSR") == 0){
-        //AddJournal("mkusr",COMMS,664,"users.txt","Archivo");
+        AddJournal("mkusr",COMMS,664,"users.txt","Archivo");
         mkusr_do(nwInf);
         printf("\n");
         printf("MKUSR SUCCESS: Usuario   -> %s <-   Creado Exitosamente\n",nwInf->_usr);
@@ -671,7 +671,7 @@ void mkusr_cmd(InfoCatcher* nwInf){
 
 void rmusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMUSR") == 0){
-        //AddJournal("rmusr",COMMS,664,"users.txt","Archivo");
+        AddJournal("rmusr",COMMS,664,"users.txt","Archivo");
         rmusr_do(nwInf);
         printf("\n");
         printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
@@ -681,7 +681,7 @@ void rmusr_cmd(InfoCatcher* nwInf){
 void mkdir_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKDIR") == 0){
         char* DirName = Path_Get_LastDirName(nwInf->_path);
-        //AddJournal("mkdir",COMMS,664,DirName,"Folder");
+        AddJournal("mkdir",COMMS,664,DirName,"Folder");
         mkdir_do(nwInf);
         //char* FolderName = Path_get_Last_FolderName(nwInf->_path);
         //printf("\n");
@@ -692,7 +692,7 @@ void mkdir_cmd(InfoCatcher* nwInf){
 void mkfile_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKFILE") == 0){
         char* FileName = Path_Get_FileName(nwInf->_path);
-        //AddJournal("mkfile",COMMS,664,FileName,"Archivo");
+        AddJournal("mkfile",COMMS,664,FileName,"Archivo");
         mkfile_do(nwInf);
         printf("\n");
         printf("MKFILE SUCCESS: Archivo   -> %s <-   Creado Exitosamente\n",FileName); 
@@ -707,12 +707,12 @@ void rem_cmd(InfoCatcher* nwInf){
         int  istxt = Check_If_Is_txtFile(tmp);
         rem_do(tmp,istxt);
         if(istxt == 1){
-            //AddJournal("rem",COMMS,664,tmp,"Archivo");
+            AddJournal("rem",COMMS,664,tmp,"Archivo");
             printf("\n");
             printf("REM SUCCESS: Archivo   -> %s <-   Eliminado Exitosamente\n",tmp); 
         }
         else{
-            //AddJournal("rem",COMMS,664,tmp,"Folder");
+            AddJournal("rem",COMMS,664,tmp,"Folder");
             printf("\n");
             printf("REM SUCCESS: Folder   -> %s <-   Eliminado Exitosamente\n",tmp); 
         }
@@ -727,12 +727,12 @@ void mv_cmd(InfoCatcher* nwInf){
         int  istxt = Check_If_Is_txtFile(tmp);
         mv_do(nwInf);
         if(istxt == 1){
-            //AddJournal("mv",COMMS,664,tmp,"Archivo");
+            AddJournal("mv",COMMS,664,tmp,"Archivo");
             printf("\n");
             printf("MV SUCCESS: Archivo   -> %s <-   Movido Exitosamente\n",tmp); 
         }
         else{
-            //AddJournal("mv",COMMS,664,tmp,"Folder");
+            AddJournal("mv",COMMS,664,tmp,"Folder");
             printf("\n");
             printf("MV SUCCESS: Folder   -> %s <-   Movido Exitosamente\n",tmp); 
         }
@@ -757,6 +757,7 @@ void recovery_cmd(InfoCatcher* nwInf){
             }
             i++;
         }
+        Omni = newGLS();
     }
 
 }
@@ -1062,6 +1063,12 @@ void ExecuteComand(char *InputString){
             {
                 char* NewCommand = (char*)DeQueue(CommandList);
                 COMMS = newString(NewCommand);
+                COMMS = StringCloneWithOut(COMMS,'\"');
+                COMMS = StringCloneWithOut(COMMS,'\t');
+                COMMS = StringCloneWithOut(COMMS,'\t');
+                COMMS = StringCloneWithOut(COMMS,'\n');
+                COMMS = StringCloneWithOut(COMMS,'\r');
+                COMMS = StringCloneWithOut(COMMS,'\'');
                 ExecuteComand(NewCommand);
             }   
         }

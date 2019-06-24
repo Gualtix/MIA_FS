@@ -17,6 +17,14 @@
 #include <string.h>
 #include <math.h>
 
+void Add_Div(FILE* DotFl){
+    fprintf(DotFl,"\t\t\t\t<TR>\n");
+        fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\" colspan=\"2\">\n");
+            fprintf(DotFl,"\t\t\t\t\t\t*** *** *** *** *** ***<br/>\n");
+        fprintf(DotFl,"\t\t\t\t\t</TD>\n");
+    fprintf(DotFl,"\t\t\t\t</TR>\n");
+}
+
 
 
 void AddSuper(FILE* DotFl,char* Color,char* TopTittle,int ColSpan){
@@ -1112,14 +1120,45 @@ void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
             fprintf(DotFl,"\t\t\t\t>\n");
         fprintf(DotFl,"\t\t\t]\n");
 
-        
-
         fprintf(DotFl,"\t\t}\n");
         fprintf(DotFl,"}\n");
         fclose(DotFl);
         //Generate_TypeFile_Rep(CompleteReportPathDir);
     }
 }
+
+void Add_Jr_Body(FILE* DotFl){
+
+    int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+
+    int iN = Omni->SBinuse->s_inodes_count;
+    int i = 0;
+    
+    while(i < iN){
+        Journaling* tmp = (Journaling*)BinLoad_Str(Jr_StartByte + (i * sizeof(Journaling)),"Journaling");
+        char* CMD   = newString(tmp->CMD);
+        char* Param = newString(tmp->Content);
+        if(tmp->isOccupied == '0' || tmp->isOccupied != '1'){
+            break;
+        }
+        if(tmp->isOccupied != '0'){
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
+            //fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>En Uso</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isOccupied);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Operacion</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->CMD);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Nombre</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->File_of_FolderName);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Tipo</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isFile_or_Folder);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Contenido</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Content);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Fecha</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Date);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Propietario</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Owner);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Permisos</TD><TD bgcolor=\"#ffffff\">%i</TD></TR>\n",tmp->Permits);
+            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
+        }
+        i++;
+    }
+
+}
+
+
 
 void Generate_File_Rep(char* CompleteReportPathDir,char* _ruta){
 
@@ -1134,7 +1173,16 @@ void Generate_File_Rep(char* CompleteReportPathDir,char* _ruta){
     Write_txtFile(CompleteReportPathDir,txtContent);
 }
 
-void Generate_Journaling(FILE* DotFl,int jStartByte){
+void Generate_Journaling(FILE* DotFl){
+    fprintf(DotFl,"\t\tLs_Report\n");
+    fprintf(DotFl,"\t\t\t[label =\n");
+    fprintf(DotFl,"\t\t\t\t<\n");
+    fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#33ff33\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
+    fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Parametro</TD><TD>Contenido</TD></TR>\n");
+    Add_Jr_Body(DotFl);
+    fprintf(DotFl,"\t\t\t\t\t</TABLE>\n");
+    fprintf(DotFl,"\t\t\t\t>\n");
+    fprintf(DotFl,"\t\t\t]\n");
 
 }
 
@@ -1182,9 +1230,9 @@ void FullViewRender(char* CompleteReportPathDir,char* Type){
     
         //(^< ............ ............ ...........   Journaling
         if(strcasecmp(Type,"journaling") == 0){
-            int jStart = Omni->SBinuse->s_block_start + sizeof(SuperBlock);
-            Journaling* Jr = (Journaling*)BinLoad_Str(jStart,"Journaling");
-            Generate_Journaling(DotFl,jStart);
+            //int jStart = Omni->SBinuse->s_block_start + sizeof(SuperBlock);
+            //Journaling* Jr = (Journaling*)BinLoad_Str(jStart,"Journaling");
+            Generate_Journaling(DotFl);
         }
 
         //(^< ............ ............ ...........   FileSystemTree
