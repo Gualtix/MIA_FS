@@ -1006,8 +1006,9 @@ void LsTravel(FILE* DotFl,int Bit_ID){
             
             if(isFolder && isCurrent != 0 && isFather != 0){
                 //Folder
-                LsTravel(DotFl,next_i_Node_Bit_ID);
                 Add_LsRow(DotFl,next_i_Node_Bit_ID,"Folder",tName);
+                LsTravel(DotFl,next_i_Node_Bit_ID);
+                
             }
             else{
                 //File
@@ -1020,11 +1021,10 @@ void LsTravel(FILE* DotFl,int Bit_ID){
         i++;
     }
 
-
-
     while (i < 15){
-        /*
+        
         if(i_Node->i_block[i] == -1) {i++; continue;};
+        /*
 
         int PB_Bit_ID = i_Node->i_block[i];
         PointerBlock* PointerB = (PointerBlock*)BinLoad_Str(PB_Bit_ID,"PointerBlock");
@@ -1035,7 +1035,7 @@ void LsTravel(FILE* DotFl,int Bit_ID){
 
             int FB_Bit_ID = i_Node->i_block[i];
             FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
-
+            
             int k = 0;
             while (k < 4){
                 if(FolderB->b_content[k].b_inodo == -1){k++; continue;}
@@ -1050,22 +1050,26 @@ void LsTravel(FILE* DotFl,int Bit_ID){
                 
                 if(isFolder && isCurrent != 0 && isFather != 0){
                     //Folder
-                    LsTravel(DotFl,next_i_Node_Bit_ID);
-                    Add_LsRow(DotFl,next_i_Node_Bit_ID,"Folder",tName);
+                    //Add_LsRow(DotFl,next_i_Node_Bit_ID,"Folder",tName);
+                    //LsTravel(DotFl,next_i_Node_Bit_ID);
+                    
                 }
                  else{
                      //File
                     if(isFolder == 0){
-                        Add_LsRow(DotFl,next_i_Node_Bit_ID,"Archivo",tName);
+                    
+                        //Add_LsRow(DotFl,next_i_Node_Bit_ID,"Archivo",tName);
                     }
                 }
                 k++;
             }
+        
             j++;
         }
-        */
+        */    
         i++;
     }
+    
 }
 
 void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
@@ -1092,7 +1096,7 @@ void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
         fprintf(DotFl,"\trankdir = LR;\n");
         fprintf(DotFl,"\tnode [shape = plaintext];\n");
         fprintf(DotFl,"\t\tsubgraph cluster_OutLook {\n");
-        fprintf(DotFl,"\t\t\tlabel = \"LS Report :: FileSystem\";\n");
+        fprintf(DotFl,"\t\t\tlabel = \"LS Report :: %s\";\n",_ruta);
         fprintf(DotFl,"\t\t\tgraph[style = dotted];\n");
 
         //(^< ............ ............ ...........   Ls

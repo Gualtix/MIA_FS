@@ -12,6 +12,7 @@ typedef struct GLS{
 }GLS;
 
 GLS* Omni;
+char* COMMS;
 
 GLS* newGLS(){
     

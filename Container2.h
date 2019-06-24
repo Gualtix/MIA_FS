@@ -29,15 +29,36 @@ FileFolderInfo* newFileFolderInfo(){
 
 typedef struct Journaling{
     int  Start_Byte_Available;
-    int  Occupied;
-    char CommandLine[350];
-    char Date;
+    char  isOccupied;
+
+    char CMD[25];
+
+    char isFile_or_Folder;
+    char File_of_FolderName[25];
+
+    char Content [250];
+
+    char Date[25];
+    char Owner[25];
+    int  Permits;
+
 }Journaling;
 
 Journaling* newJournaling(){
     Journaling* Jr = (Journaling*)malloc(sizeof(Journaling));
-    Jr->Start_Byte_Available = 0;
-    Jr->Occupied = 0;
+
+    Jr->Start_Byte_Available = -1;
+    Jr->isOccupied = 0;
+
+    memset(Jr->CMD,'\0',25);
+
+    Jr->isFile_or_Folder = '0';
+    memset(Jr->File_of_FolderName,'\0',25);
+
+    memset(Jr->Content,'\0',500);
+
+    Jr->Permits = -1;
+    
     return Jr;
 }
 

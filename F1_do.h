@@ -484,6 +484,33 @@ void rem_do(char* tmp,int istxt){
     }
 }
 
+void mv_do(InfoCatcher* nwInf){
+    DoublyGenericList* Ph = PathSeparate(nwInf->_path);
+    Pop(Ph);
+    char* OrgName = (char*)Pop(Ph);
+    int  istxt    = Check_If_Is_txtFile(OrgName);
+
+    Ph = PathSeparate(nwInf->_dest);
+    Pop(Ph);
+    char* DestName = (char*)Pop(Ph);
+
+
+    //-------------------------------------->Fuente
+
+    SeekInfo* Origin = CompleteSeeker(0,OrgName);
+    SeekInfo* Dest   = CompleteSeeker(0,DestName);
+
+    FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(Origin->FB_Bit_ID,"FolderBlock");
+    memset(FolderB->b_content[Origin->FB_Index].b_name,'\0',12);
+    FolderB->b_content[Origin->FB_Index].b_inodo = -1;
+
+    BinWrite_Struct(FolderB,Origin->FB_Bit_ID,"FolderBlock");
+
+    //-------------------------------------->Destino
+    pushMoved(Dest->iNode_Bit_ID,Origin->iNode_Bit_ID,OrgName);
+
+}
+
 void rep_F1_do(InfoCatcher* nwInf){
 
     char* tmp = nwInf->_path;
@@ -514,6 +541,8 @@ void rep_F1_do(InfoCatcher* nwInf){
         return;
     }
 }
+
+
 
 void rep_F2_do(InfoCatcher* nwInf){
     setOmni(nwInf->_id);

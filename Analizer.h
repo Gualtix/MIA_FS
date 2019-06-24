@@ -145,6 +145,12 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
             continue;
         }
 
+        //(^< ............ ............ ............   _dest
+        if(!strcasecmp(Prm_Izq,"-dest")){
+            (*nwInf)->_dest = newString(Prm_Der);
+            continue;
+        }
+
         /*
         if(strcasecmp(Prm_Izq,"-path") && strcasecmp(Prm_Izq,"-cont")){
             if(Prm_Der != NULL){
@@ -638,6 +644,7 @@ void login_cmd(InfoCatcher* nwInf){
 
 void mkgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKGRP") == 0){
+        //AddJournal("mkgrp",COMMS,664,"users.txt","Archivo");
         mkgrp_do(nwInf);
         printf("\n");
         printf("MKGRP SUCCESS: Grupo   -> %s <-   Creado Exitosamente\n",nwInf->_name);
@@ -646,6 +653,7 @@ void mkgrp_cmd(InfoCatcher* nwInf){
 
 void rmgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMGRP") == 0){
+        //AddJournal("rmgrp",COMMS,664,"users.txt","Archivo");
         rmgrp_do(nwInf);
         printf("\n");
         printf("RMGRP SUCCESS: Grupo   -> %s <-   Eliminado Exitosamente\n",nwInf->_name);
@@ -654,6 +662,7 @@ void rmgrp_cmd(InfoCatcher* nwInf){
 
 void mkusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKUSR") == 0){
+        //AddJournal("mkusr",COMMS,664,"users.txt","Archivo");
         mkusr_do(nwInf);
         printf("\n");
         printf("MKUSR SUCCESS: Usuario   -> %s <-   Creado Exitosamente\n",nwInf->_usr);
@@ -662,6 +671,7 @@ void mkusr_cmd(InfoCatcher* nwInf){
 
 void rmusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMUSR") == 0){
+        //AddJournal("rmusr",COMMS,664,"users.txt","Archivo");
         rmusr_do(nwInf);
         printf("\n");
         printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
@@ -670,6 +680,8 @@ void rmusr_cmd(InfoCatcher* nwInf){
 
 void mkdir_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKDIR") == 0){
+        char* DirName = Path_Get_LastDirName(nwInf->_path);
+        //AddJournal("mkdir",COMMS,664,DirName,"Folder");
         mkdir_do(nwInf);
         //char* FolderName = Path_get_Last_FolderName(nwInf->_path);
         //printf("\n");
@@ -679,8 +691,9 @@ void mkdir_cmd(InfoCatcher* nwInf){
 
 void mkfile_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKFILE") == 0){
-        mkfile_do(nwInf);
         char* FileName = Path_Get_FileName(nwInf->_path);
+        //AddJournal("mkfile",COMMS,664,FileName,"Archivo");
+        mkfile_do(nwInf);
         printf("\n");
         printf("MKFILE SUCCESS: Archivo   -> %s <-   Creado Exitosamente\n",FileName); 
     }
@@ -694,15 +707,110 @@ void rem_cmd(InfoCatcher* nwInf){
         int  istxt = Check_If_Is_txtFile(tmp);
         rem_do(tmp,istxt);
         if(istxt == 1){
+            //AddJournal("rem",COMMS,664,tmp,"Archivo");
             printf("\n");
             printf("REM SUCCESS: Archivo   -> %s <-   Eliminado Exitosamente\n",tmp); 
         }
         else{
+            //AddJournal("rem",COMMS,664,tmp,"Folder");
             printf("\n");
             printf("REM SUCCESS: Folder   -> %s <-   Eliminado Exitosamente\n",tmp); 
         }
     }
 }
+
+void mv_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"MV") == 0){
+        DoublyGenericList* Ph = PathSeparate(nwInf->_path);
+        Pop(Ph);
+        char* tmp = (char*)Pop(Ph);
+        int  istxt = Check_If_Is_txtFile(tmp);
+        mv_do(nwInf);
+        if(istxt == 1){
+            //AddJournal("mv",COMMS,664,tmp,"Archivo");
+            printf("\n");
+            printf("MV SUCCESS: Archivo   -> %s <-   Movido Exitosamente\n",tmp); 
+        }
+        else{
+            //AddJournal("mv",COMMS,664,tmp,"Folder");
+            printf("\n");
+            printf("MV SUCCESS: Folder   -> %s <-   Movido Exitosamente\n",tmp); 
+        }
+    }
+}
+
+void recovery_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"RECOVERY") == 0){
+        setOmni(nwInf->_id);
+
+        int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+
+        int iN = Omni->SBinuse->s_inodes_count;
+        int i = 0;
+        
+        while(i < iN){
+            Journaling* tmp = (Journaling*)BinLoad_Str(Jr_StartByte + (i * sizeof(Journaling)),"Journaling");
+            char* CMD   = newString(tmp->CMD);
+            char* Param = newString(tmp->Content);
+            if(tmp->isOccupied == '0'){
+                break;
+            }
+            i++;
+        }
+    }
+
+}
+void loss_cmd(InfoCatcher* nwInf){
+    if(ErrorManager(nwInf,"LOSS") == 0){
+
+        Mounted_Part* mP = getPartMounted_By_vID(nwInf->_id);
+        char* Bf = newString(1024);
+        //memset(Bf,'x',1024);
+        setOmni(nwInf->_id);
+
+        int iN = Omni->SBinuse->s_inodes_count;
+
+
+        int Part_StartByte = Omni->PartBatch_inUse->StartByte;
+        int Part_EndByte   = Omni->PartBatch_inUse->EndByte;
+
+        int Jr_EndByte = Part_StartByte + (sizeof(SuperBlock) * iN) + sizeof(Journaling);
+
+        int LossSize = Part_EndByte - Jr_EndByte;
+
+        int Div = LossSize / 1024;
+        int Res = LossSize % 1024;
+
+        FILE* Fl = fopen(Omni->CompletePathDir_of_Disk_inUse,"rb+");
+        if(Fl){
+            int i = 0;
+            int Last = 0;
+            while(i < Div){
+                fseek(Fl,Jr_EndByte + (i * 1024),SEEK_SET);
+                fwrite(Bf,1024,1,Fl);
+                Last = Jr_EndByte + (i * 1024);
+                i++;
+            }
+            if(Res > 0){
+                Last = Last + 1024;
+                Bf = newString(Res);
+                fseek(Fl,Last,SEEK_SET);
+                fwrite(Bf,1024,1,Fl);
+                Last = Last + Res;
+                int ee = 0;
+            }
+            
+            fclose(Fl);
+        }
+
+    
+        Omni = newGLS();
+
+        printf("\n");
+        printf("LOSS SUCCESS: Simulacion de Perdida Sobre   -> %s <-   Realizada Exitosamente\n",nwInf->_id);
+    }
+}
+        
 
 /*
 void rep_cmd(InfoCatcher* nwInf){
@@ -855,6 +963,26 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
 
+    else if (!strcasecmp(Bf, "mv")){
+        if(Omni->LoggedUser ==  NULL){
+            printf("\n");
+            printf("MV ERROR: No Hay Ninguna Sesion Iniciada...\n");
+            return 0;
+        }
+        mv_cmd(nwInf);
+        return 0;
+    }
+
+    else if (!strcasecmp(Bf, "recovery")){
+        recovery_cmd(nwInf);
+        return 0;
+    }
+
+    else if (!strcasecmp(Bf, "loss")){
+        loss_cmd(nwInf);
+        return 0;
+    }
+
 
 
    return 1;
@@ -933,6 +1061,7 @@ void ExecuteComand(char *InputString){
             while (CommandList->Length > 0)
             {
                 char* NewCommand = (char*)DeQueue(CommandList);
+                COMMS = newString(NewCommand);
                 ExecuteComand(NewCommand);
             }   
         }

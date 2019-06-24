@@ -311,11 +311,66 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         return 0;
     }
     //CP   ********************************************************************************************************
-    //MV   ********************************************************************************************************
+    //LOSS   ******************************************************************************************************
+    else if(strcasecmp(CMD,"LOSS") == 0){
+        //(^< ............ ............ ............ ............ ............ -id: Mandatory
+        if(_id_Val("LOSS",nwInf->_id) == 1) return 1;
+        return 0;
+    }
+
+    //RECOVERY   **************************************************************************************************
+    else if(strcasecmp(CMD,"RECOVERY") == 0){
+        //(^< ............ ............ ............ ............ ............ -id: Mandatory
+        if(_id_Val("RECOVERY",nwInf->_id) == 1) return 1;
+        return 0;
+        }
     //FIND   ******************************************************************************************************
     //CHOWN   ***************************************************************************************************** 
     //CHGRP   *****************************************************************************************************
     //MV   ********************************************************************************************************
+    else if(strcasecmp(CMD,"MV") == 0){
+
+   
+        //(^< ............ ............ ............ ............ ............ -path: Mandatory
+        if(nwInf->_path == NULL){
+            ErrorPrinter("MV","ERROR","-path","NULL","Es Obligatorio");
+            return 1;
+        }
+        //(^< ............ ............ ............ ............ ............ -dest: Mandatory
+        if(nwInf->_dest == NULL){
+            ErrorPrinter("MV","ERROR","-dest","NULL","Es Obligatorio");
+            return 1;
+        }
+
+        DoublyGenericList* Ph = PathSeparate(nwInf->_path);
+        Pop(Ph);
+        char* OrgName = (char*)Pop(Ph);
+        int  istxt    = Check_If_Is_txtFile(OrgName);
+
+        Ph = PathSeparate(nwInf->_dest);
+        Pop(Ph);
+        char* DestName = (char*)Pop(Ph);
+
+        SeekInfo* Origin = CompleteSeeker(0,OrgName);
+        SeekInfo* Dest   = CompleteSeeker(0,DestName);
+        
+        if(Origin == NULL){
+            if(istxt == 1){
+                ErrorPrinter("MV","ERROR","-ruta",OrgName,"El Archivo Origen No Existe");
+                return 1;
+            }
+            else{
+                ErrorPrinter("MV","ERROR","-ruta",OrgName,"El Folder Origen No Existe");
+                return 1;
+            }
+        }
+        if(Origin == NULL){
+            ErrorPrinter("MV","ERROR","-ruta",DestName,"El Folder Destino No Existe");
+            return 1;
+        }
+        return 0;
+        
+    }
     //REP   *******************************************************************************************************
     else if(strcasecmp(CMD,"REP") == 0){
 

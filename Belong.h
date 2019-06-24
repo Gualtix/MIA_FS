@@ -856,6 +856,9 @@ void* BinLoad_Str(int Bit_ID,char* StrType){
     if(strcasecmp(StrType,"Inode") == 0){
         StartByte = Bit_to_StartByte(Bit_ID,"Inode");
     }
+    else if(strcasecmp(StrType,"Journaling") == 0){
+        StartByte = Bit_ID;
+    }
     else{
         StartByte = Bit_to_StartByte(Bit_ID,"Block");
     }
@@ -907,6 +910,9 @@ int BinWrite_Struct(void* Str,int Bit_ID,char* StrType){
     
     if(strcasecmp(StrType,"Inode") == 0){
         StartByte = Bit_to_StartByte(Bit_ID,"Inode");
+    }
+    else if(strcasecmp(StrType,"Journaling") == 0){
+        StartByte = Bit_ID;
     }
     else{
         StartByte = Bit_to_StartByte(Bit_ID,"Block");
@@ -1401,6 +1407,47 @@ int allocate_NewFolder(int iNodeFather_Bit_ID,char* FolderName,int Permits,int i
 
 }
 
+void pushMoved(int Dest_Bit_ID,int new_Bit_ID,char* newName){
+    Inode* i_Node = (Inode*)BinLoad_Str(Dest_Bit_ID,"Inode");
+
+    int i = 0;
+    int yes = 1;
+    while (i < 12){
+        if(i_Node->i_block[i] == -1) 
+        {
+            if(yes == 0){
+                FolderBlock* Fb = newFolderBlock();
+                Fb->b_content[0].b_inodo = new_Bit_ID;
+                strcpy(Fb->b_content[0].b_name,newName);
+                int Fbit = getFirst_BlockBit_Free();
+                BinWrite_Struct(Fb,Fbit,"FolderBlock");
+
+                i_Node->i_block[i] = Fbit;
+                BinWrite_Struct(i_Node,Dest_Bit_ID,"Inode");
+                return;
+            }
+        }
+
+        int FB_Bit_ID = i_Node->i_block[i];
+        FolderBlock* FolderB = (FolderBlock*)BinLoad_Str(FB_Bit_ID,"FolderBlock");
+
+        int j = 0;
+        int Empty = 0;
+        while (j < 4){
+            if(FolderB->b_content[j].b_inodo == -1) {
+                FolderB->b_content[j].b_inodo = new_Bit_ID;
+                strcpy(FolderB->b_content[j].b_name,newName);
+                BinWrite_Struct(FolderB,FB_Bit_ID,"FolderBlock");
+                return;
+            }
+            j++;
+        }
+        yes = 0;
+
+        i++;
+    }
+}
+
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ F I L E
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1628,6 +1675,57 @@ int allocate_newFile(int iNode_Folder_Bit_ID,char* FileName,char* Content,int Pe
 //(^< ............ ............ ............ ............ ............ F O R M A T
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
+/*
+void Add_FirstDefault_Journaling(){
+    //int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+    //BinWrite_Struct(newJournaling(),Jr_Start_Byte,"Journaling");
+}
+
+void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
+
+    /*
+    char Tp = '0';
+    if(strcasecmp(Type,"Archivo")){
+        Tp = 1;
+    }
+
+    Journaling* Jr = newJournaling();
+    strcpy(Jr->CMD,CMD);
+    strcpy(Jr->Content,Content);
+    strcpy(Jr->Date,getDateTime());
+    strcpy(Jr->Owner,Omni->LoggedUser->UsrName);
+    Jr->Permits = Permits;
+    Jr->isOccupied = '1';
+    strcpy(Jr->File_of_FolderName,Name);
+    Jr->isFile_or_Folder = Tp;
+
+
+    //First
+    int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+    Journaling* tmp = (Journaling*)BinLoad_Str(Jr_Start_Byte,"Journaling");
+
+    int Limit = Omni->SBinuse->s_bm_inode_start;
+
+    if(tmp->isOccupied == '0'){
+        BinWrite_Struct(Jr,Jr_Start_Byte,"Journaling");
+        return;
+    }
+
+    while(tmp->isOccupied == '1' && Jr_Start_Byte < Limit){
+        Jr_Start_Byte =  Jr_Start_Byte + sizeof(Journaling);
+        tmp = (Journaling*)BinLoad_Str(Jr_Start_Byte,"Journaling");
+         if(tmp->isOccupied == '1'){
+             continue;
+        }
+        else{
+            BinWrite_Struct(Jr,Jr_Start_Byte,"Journaling");
+            return;
+        }
+    }
+    
+   
+}
+*/
 
 void Fast_PartFormat(){
     clear_blockBits();
@@ -1670,7 +1768,7 @@ void Format_to_EXT3(){
     int Z = Omni->PartBatch_inUse->StartByte;
 
     //Inode BitMap StartByte
-    int Y = Z + sizeof(SuperBlock) + sizeof(Journaling);
+    int Y = Z + sizeof(SuperBlock) + (iN * sizeof(Journaling));
 
     //Block BitMap StartByte
     int X = Y + iN;
@@ -1695,6 +1793,8 @@ void Format_to_EXT3(){
     Full_PartFormat();
 
     UpdateSuperBlock();
+
+    //Add_FirstDefault_Journaling();
 }
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
