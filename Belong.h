@@ -6,6 +6,8 @@
 
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
+
+
 int MBRPartArray_ExtendedCounter(MBR* Bf){
     int cnt = 0;
     int i  = 0;
@@ -1015,6 +1017,38 @@ void setOmni(char* mID){
     Omni->SBinuse = LoadSuperBlock(bt->StartByte);
 }
 
+void Format_1024_With(int StartByte,int EndByte,char  Op){
+
+    char* Bf = newString(1024);
+    memset(Bf,Op,1024);
+    
+    int sz = EndByte - StartByte + 1;
+
+    int Div = sz / 1024;
+    int Res = sz % 1024;
+
+    FILE* Fl = fopen(Omni->CompletePathDir_of_Disk_inUse,"rb+");
+    if(Fl){
+        int i = 0;
+        int Last = 0;
+        while(i < Div){
+            fseek(Fl,StartByte + (i * 1024),SEEK_SET);
+            fwrite(Bf,1024,1,Fl);
+            Last = StartByte + (i * 1024);
+            i++;
+        }
+        if(Res > 0){
+            Last = Last + 1024;
+            Bf = newString(Res);
+            fseek(Fl,Last,SEEK_SET);
+            fwrite(Bf,1024,1,Fl);
+            Last = Last + Res;
+        }
+        
+        fclose(Fl);
+    }
+}
+
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 //(^< ............ ............ ............ ............ ............ I N O D E
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -1047,6 +1081,7 @@ int getFirst_InodeBit_Free(){
 void clear_inodeBits(){
     int StartByte = Omni->SBinuse->s_bm_inode_start;
     int EndByte = Omni->SBinuse->s_bm_block_start - 1;
+    //Format_1024_With(StartByte,EndByte,'0');
     int CubeSize = (EndByte - StartByte + 1); 
     BinWrite_withChar(StartByte,'0',CubeSize);
 }
@@ -1097,6 +1132,7 @@ int getFirst_BlockBit_Free(){
 void clear_blockBits(){
     int StartByte = Omni->SBinuse->s_bm_block_start;
     int EndByte = Omni->SBinuse->s_inode_start - 1;
+    //Format_1024_With(StartByte,EndByte,'0');
     int CubeSize = (EndByte - StartByte + 1); 
     BinWrite_withChar(StartByte,'0',CubeSize);
 }
@@ -1727,12 +1763,17 @@ void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
 }
 
 
+
 void Fast_PartFormat(){
+
     clear_blockBits();
     clear_inodeBits();
 }
 
 void Full_PartFormat(){
+    //int StartByte = Omni->PartBatch_inUse->StartByte;
+    //int EndByte   = Omni->PartBatch_inUse->EndByte;
+    //Format_1024_With(StartByte,EndByte,'\0');
     Fast_PartFormat();
 }
 
@@ -1743,6 +1784,8 @@ int Calc_iN(int PartSize){
 
 void Format_to_EXT2(){
 }
+
+
 
 void Format_to_EXT3(){
 

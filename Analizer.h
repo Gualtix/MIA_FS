@@ -11,10 +11,12 @@
 
 #include "Container.h"
 
-#include "F1_do.h"
+
 
 #include "Rep/F1_Rep.h"
 #include "Validate.h"
+
+#include "F1_do.h"
 
 
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
@@ -739,31 +741,10 @@ void mv_cmd(InfoCatcher* nwInf){
     }
 }
 
-void recovery_cmd(InfoCatcher* nwInf){
-    if(ErrorManager(nwInf,"RECOVERY") == 0){
-        setOmni(nwInf->_id);
 
-        int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
-
-        int iN = Omni->SBinuse->s_inodes_count;
-        int i = 0;
-        
-        while(i < iN){
-            Journaling* tmp = (Journaling*)BinLoad_Str(Jr_StartByte + (i * sizeof(Journaling)),"Journaling");
-            char* CMD   = newString(tmp->CMD);
-            char* Param = newString(tmp->Content);
-            if(tmp->isOccupied == '0'){
-                break;
-            }
-            i++;
-        }
-        Omni = newGLS();
-    }
-
-}
 void loss_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"LOSS") == 0){
-
+        
         Mounted_Part* mP = getPartMounted_By_vID(nwInf->_id);
         char* Bf = newString(1024);
         //memset(Bf,'x',1024);
@@ -974,10 +955,7 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
         return 0;
     }
 
-    else if (!strcasecmp(Bf, "recovery")){
-        recovery_cmd(nwInf);
-        return 0;
-    }
+    
 
     else if (!strcasecmp(Bf, "loss")){
         loss_cmd(nwInf);
@@ -1050,6 +1028,41 @@ void ExecuteComand(char *InputString){
     InfoCatcher* nwInf = newInfoCatcher();
     fillInfoCatcher(tmpCL,&nwInf);
 
+    //------------ R E C O V E R Y ------------------------------------------------------------
+
+    if (strcasecmp(Main_CMD, "recovery") == 0){
+        if(ErrorManager(nwInf,"RECOVERY") == 0){
+            setOmni(nwInf->_id);
+
+            int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+
+            int iN = Omni->SBinuse->s_inodes_count;
+            int i = 0;
+            
+            while(i < iN){
+                Journaling* tmp = (Journaling*)BinLoad_Str(Jr_StartByte + (i * sizeof(Journaling)),"Journaling");
+                char* CMD   = newString(tmp->CMD);
+                char* Param = newString(tmp->Content);
+                if(tmp->isOccupied == '0' || tmp->isOccupied != '1'){
+                    break;
+                }
+                if(tmp->isOccupied != '0'){
+                    ExecuteComand(CMD);
+                }
+                i++;
+            }
+            Omni = newGLS();
+        }
+
+        AppDiv();
+        Div2();
+        return ;
+    }
+
+    //-----------------------------------------------------------------------------------------
+
+
+
     unknownCMD = ScanF1(Main_CMD,nwInf);
 
     if(unknownCMD != 0){
@@ -1082,6 +1095,8 @@ void ExecuteComand(char *InputString){
     Div2();
     //getchar();
 }
+
+
 
 
 #endif // ANALIZER_H
