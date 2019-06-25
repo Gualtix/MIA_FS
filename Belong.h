@@ -4,6 +4,7 @@
 #include "Fw/Helper.h"
 #include "Glovs.h"
 
+
 #pragma GCC diagnostic ignored "-Wwrite-strings"
 
 
@@ -1010,11 +1011,14 @@ void setOmni(char* mID){
 
     Mounted_Part* mP = getPartMounted_By_vID(mID);
     
+    char* uus = Omni->CompletePathDir_of_Disk_inUse;
     MBR* Disk = LoadMBR(Omni->CompletePathDir_of_Disk_inUse);
     Batch* bt = getBatch_By_PartName(Omni->CompletePathDir_of_Disk_inUse,Disk,mP->ParName);
     Omni->PartBatch_inUse = bt;
 
     Omni->SBinuse = LoadSuperBlock(bt->StartByte);
+
+    //Omni->Jr_Idex = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
 }
 
 void Format_1024_With(int StartByte,int EndByte,char  Op){
@@ -1040,8 +1044,9 @@ void Format_1024_With(int StartByte,int EndByte,char  Op){
         if(Res > 0){
             Last = Last + 1024;
             Bf = newString(Res);
+            memset(Bf,Op,Res);
             fseek(Fl,Last,SEEK_SET);
-            fwrite(Bf,1024,1,Fl);
+            fwrite(Bf,Res,1,Fl);
             Last = Last + Res;
         }
         
@@ -1080,10 +1085,10 @@ int getFirst_InodeBit_Free(){
 
 void clear_inodeBits(){
     int StartByte = Omni->SBinuse->s_bm_inode_start;
-    int EndByte = Omni->SBinuse->s_bm_block_start - 1;
-    //Format_1024_With(StartByte,EndByte,'0');
-    int CubeSize = (EndByte - StartByte + 1); 
-    BinWrite_withChar(StartByte,'0',CubeSize);
+    int EndByte   = Omni->SBinuse->s_bm_block_start - 1;
+    Format_1024_With(StartByte,EndByte,'0');
+    //int CubeSize = (EndByte - StartByte + 1); 
+    //BinWrite_withChar(StartByte,'0',CubeSize);
 }
 
 int FreeInodeCounting(int iN){
@@ -1131,10 +1136,10 @@ int getFirst_BlockBit_Free(){
 
 void clear_blockBits(){
     int StartByte = Omni->SBinuse->s_bm_block_start;
-    int EndByte = Omni->SBinuse->s_inode_start - 1;
-    //Format_1024_With(StartByte,EndByte,'0');
-    int CubeSize = (EndByte - StartByte + 1); 
-    BinWrite_withChar(StartByte,'0',CubeSize);
+    int EndByte   = Omni->SBinuse->s_inode_start - 1;
+    Format_1024_With(StartByte,EndByte,'0');
+    //int CubeSize = (EndByte - StartByte + 1); 
+    //BinWrite_withChar(StartByte,'0',CubeSize);
 }
 
 int FreeBlockCounting(int iN){
@@ -1720,12 +1725,26 @@ void Add_FirstDefault_Journaling(){
 
 void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
 
+    int First_Index = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+    Journaling* First_Jr = (Journaling*)BinLoad_Str(First_Index,"Journaling");
+
+    int Available_Index = First_Jr->Available_Index;
+
+    if(Available_Index == -1){
+        Available_Index = First_Index;
+    }
+
     char Tp = '0';
     if(strcasecmp(Type,"Archivo")){
         Tp = '1';
     }
 
+    First_Jr->Available_Index = Available_Index + sizeof(Journaling); 
+    BinWrite_Struct(First_Jr,First_Index,"Journaling");
+
+
     Journaling* Jr = newJournaling();
+    Jr->Available_Index = Available_Index + sizeof(Journaling);
     strcpy(Jr->CMD,CMD);
     strcpy(Jr->Content,Content);
     strcpy(Jr->Date,getDateTime());
@@ -1735,16 +1754,25 @@ void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
     strcpy(Jr->File_of_FolderName,Name);
     Jr->isFile_or_Folder = Tp;
 
+    BinWrite_Struct(Jr,Available_Index,"Journaling");
 
+    //FullViewRender("/home/wrm/Desktop/VonJour.png","Journaling");
+
+    /*
     //First
-    int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
-    Journaling* tmp = (Journaling*)BinLoad_Str(Jr_Start_Byte,"Journaling");
+    //int Jr_Start_Byte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
+    Journaling* tmp = (Journaling*)BinLoad_Str(Dispo,"Journaling");
 
     int Limit = Omni->SBinuse->s_bm_inode_start;
 
     if(tmp->isOccupied == '0'){
         BinWrite_Struct(Jr,Jr_Start_Byte,"Journaling");
         return;
+    }
+
+    if(strcasecmp(Content,"mkfile -path~:~/home/wrm/Desktop/b1.txt -size~:~705 -p") == 0){
+        int ee = 5;
+
     }
 
     while(tmp->isOccupied == '1' && Jr_Start_Byte < Limit){
@@ -1758,6 +1786,7 @@ void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
             return;
         }
     }
+    */
     
    
 }
@@ -1771,9 +1800,9 @@ void Fast_PartFormat(){
 }
 
 void Full_PartFormat(){
-    //int StartByte = Omni->PartBatch_inUse->StartByte;
-    //int EndByte   = Omni->PartBatch_inUse->EndByte;
-    //Format_1024_With(StartByte,EndByte,'\0');
+    int StartByte = Omni->PartBatch_inUse->StartByte;
+    int EndByte   = Omni->PartBatch_inUse->EndByte;
+    Format_1024_With(StartByte,EndByte,'\0');
     Fast_PartFormat();
 }
 
@@ -2234,8 +2263,10 @@ int make_newFolder(InfoCatcher* nwInf){
         tmp = allocate_NewFolder(tmp,tName,664,Omni->LoggedUser->ID,ggs->ID);
     }
 
-    printf("\n");
-    printf("MKDIR SUCCESS: Arbol de Directorios   -> %s <-   Creado Exitosamente\n",nwInf->_path);
+    if(isRecovery == 0){
+        printf("\n");
+        printf("MKDIR SUCCESS: Arbol de Directorios   -> %s <-   Creado Exitosamente\n",nwInf->_path);
+    }
     return tmp;
 }
 

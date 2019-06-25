@@ -57,13 +57,18 @@ int ErrorManager(InfoCatcher* nwInf,char* CMD){
         
         //(^< ............ ............ ............ ............ ............ -type: Optional
         if(nwInf->_type == NULL){
-            ErrorPrinter("MKFS","WARNING","-type","NULL","Usando Default FULL");
+            if(isRecovery == 0){
+                ErrorPrinter("MKFS","WARNING","-type","NULL","Usando Default FULL");
+            }
+            
             nwInf->_type = newString("full");
         }
 
         //(^< ............ ............ ............ ............ ............ -fs: Optional
         if(nwInf->_fs == NULL){
-            ErrorPrinter("MKFS","WARNING","-fs","NULL","Usando Default EXT3");
+            if(isRecovery == 0){
+                ErrorPrinter("MKFS","WARNING","-fs","NULL","Usando Default EXT3");
+            }
             nwInf->_fs = newString("3fs");
         }
         return 0;

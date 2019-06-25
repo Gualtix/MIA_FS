@@ -10,8 +10,9 @@
 int main()
 {
     //Check_If_FullPath_Exists("/home/wrm/Desktop/Alaska.txt");
-    newLine_Flag = 0;
-    cmdString    = NULL;
+    newLine_Flag  = 0;
+    cmdString     = NULL;
+    isRecovery    = 0;
 
     Omni = newGLS();
     

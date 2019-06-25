@@ -9,10 +9,13 @@ typedef struct GLS{
     SuperBlock*    SBinuse;
     Batch*         PartBatch_inUse;
     GroupUserInfo* LoggedUser;
+    int Jr_Idex;
 }GLS;
 
-GLS* Omni;
+GLS*  Omni;
 char* COMMS;
+int   isRecovery;
+
 
 GLS* newGLS(){
     
@@ -22,6 +25,7 @@ GLS* newGLS(){
     Omni->SBinuse = NULL;
     Omni->PartBatch_inUse = NULL;
     Omni->LoggedUser = NULL;
+    Omni->Jr_Idex = -1;
 
     return Omni;
 }

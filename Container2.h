@@ -29,6 +29,7 @@ FileFolderInfo* newFileFolderInfo(){
 
 typedef struct Journaling{
     char  isOccupied;
+    int   Available_Index;
 
     char CMD[25];
 
@@ -47,6 +48,7 @@ Journaling* newJournaling(){
     Journaling* Jr = (Journaling*)malloc(sizeof(Journaling));
 
     Jr->isOccupied = '0';
+    Jr->Available_Index = -1;
 
     memset(Jr->CMD,'\0',25);
 

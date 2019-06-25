@@ -33,6 +33,15 @@ char* getDateTime(){
     return Dt;
 }
 
+void Print_Msg(char* CMD,char* Type,char* PreMsg,char* Param,char*PostMsg){
+    printf("\n");
+    printf("%s %s: %s   -> %s <-   %s\n",CMD,Type,PreMsg,Param,PostMsg);
+}
+
+void Print_Msg(char* CMD,char* Type,char* Msg){
+    printf("\n");
+    printf("%s %s: %s\n",CMD,Type,Msg);
+}
 
 DoublyGenericList* PathSeparate(char* CompletePathDir){
 

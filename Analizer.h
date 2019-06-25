@@ -152,129 +152,7 @@ InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf)
             (*nwInf)->_dest = newString(Prm_Der);
             continue;
         }
-
-        /*
-        if(strcasecmp(Prm_Izq,"-path") && strcasecmp(Prm_Izq,"-cont")){
-            if(Prm_Der != NULL){
-                String_To_Lower(&Prm_Der);
-            }
-        }
-
-        //(^< ............ ............ ............   _filen
-        //if(!strcasecmp(Prm_Izq,"-filen")){
-        //    if(Prm_Der != NULL){
-        //        (*nwInf)->_filen = New_Char_Init_Loaded(Prm_Der);
-        //    }
-        //    continue;
-        //}
-
-        //(^< ............ ............ ............   _size
-        if(!strcasecmp(Prm_Izq,"-size")){
-            if(IsString_a_Number(Prm_Der) == 1){
-                (*nwInf)->_size =  atoi(Prm_Der);
-            }
-            continue;
-        }
-
-        //(^< ............ ............ ............   _P
-        if(!strcasecmp(Prm_Izq,"-P")){
-            (*nwInf)->_P = 'p';
-            if(Prm_Der != NULL){
-                FrontInsert(CommandList,Prm_Der);
-            }
-            
-            continue;
-        }
-
-        //(^< ............ ............ ............   _R
-        if(!strcasecmp(Prm_Izq,"-R")){
-            (*nwInf)->_R = 'r';
-            FrontInsert(CommandList,Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _filen
-        //if(!strcasecmp(Prm_Izq,"-file")){
-        //    (*nwInf)->_R = 'r';
-        //    FrontInsert(CommandList,Prm_Der);
-        //}
-
-        //(^< ............ ............ ............   _id
-        if(!strcasecmp(Prm_Izq,"-id")){
-            (*nwInf)->_id = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _grp
-        if(!strcasecmp(Prm_Izq,"-grp")){
-            (*nwInf)->_grp = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _pws
-        if(!strcasecmp(Prm_Izq,"-pwd")){
-            (*nwInf)->_pwd = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _path
-        if(!strcasecmp(Prm_Izq,"-path")){
-            (*nwInf)->_path = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _dest
-        if(!strcasecmp(Prm_Izq,"-dest")){
-            (*nwInf)->_dest = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _ugo
-        if(!strcasecmp(Prm_Izq,"-ugo")){
-            (*nwInf)->_ugo = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _usr
-        if(!strcasecmp(Prm_Izq,"-usr")){
-            (*nwInf)->_usr = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _name
-        if(!strcasecmp(Prm_Izq,"-name")){
-            (*nwInf)->_name = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _ruta
-        if(!strcasecmp(Prm_Izq,"-ruta")){
-            (*nwInf)->_ruta = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _cont
-        if(!strcasecmp(Prm_Izq,"-cont")){
-            (*nwInf)->_cont = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _type
-        if(!strcasecmp(Prm_Izq,"-type")){
-            (*nwInf)->_type = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _fs
-        if(!strcasecmp(Prm_Izq,"-fs")){
-            (*nwInf)->_fs = New_Char_Init_Loaded(Prm_Der);
-            continue;
-        }
-        */
     }
-
-
-    
 }
 
 void Exec_CMD(DoublyGenericList* CommandList){
@@ -637,53 +515,78 @@ void mkfs_cmd(InfoCatcher* nwInf){
 void login_cmd(InfoCatcher* nwInf){
     // 0 = No Errors
     if(ErrorManager(nwInf,"LOGIN") == 0){
+        if(isRecovery == 0){
+            AddJournal("login",COMMS,664,"users.txt","Archivo");
+            Print_Msg("LOGIN","SUCCESS","Sesion Iniciada Exitosamente");
+        }
+        
         login_do(nwInf);
-        printf("\n");
-        printf("LOGIN SUCCESS: Sesion Iniciada Exitosamente\n");
+        //printf("\n");
+        //printf("LOGIN SUCCESS: Sesion Iniciada Exitosamente\n");
     } 
     
 }
 
 void mkgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKGRP") == 0){
-        AddJournal("mkgrp",COMMS,664,"users.txt","Archivo");
+        if(isRecovery == 0){
+            AddJournal("mkgrp",COMMS,664,"users.txt","Archivo");
+            Print_Msg("MKGRP","SUCCESS","Grupo",nwInf->_name,"Creado Exitosamente");
+        }
+        
         mkgrp_do(nwInf);
-        printf("\n");
-        printf("MKGRP SUCCESS: Grupo   -> %s <-   Creado Exitosamente\n",nwInf->_name);
+        //printf("\n");
+        //printf("MKGRP SUCCESS: Grupo   -> %s <-   Creado Exitosamente\n",nwInf->_name);
     } 
 }
 
 void rmgrp_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMGRP") == 0){
-        AddJournal("rmgrp",COMMS,664,"users.txt","Archivo");
+        if(isRecovery == 0){
+            AddJournal("rmgrp",COMMS,664,"users.txt","Archivo");
+            Print_Msg("RMGRP","SUCCESS","Grupo",nwInf->_name,"Eliminado Exitosamente");
+        }
+        
         rmgrp_do(nwInf);
-        printf("\n");
-        printf("RMGRP SUCCESS: Grupo   -> %s <-   Eliminado Exitosamente\n",nwInf->_name);
+        //printf("\n");
+        //printf("RMGRP SUCCESS: Grupo   -> %s <-   Eliminado Exitosamente\n",nwInf->_name);
     } 
 }
 
 void mkusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKUSR") == 0){
-        AddJournal("mkusr",COMMS,664,"users.txt","Archivo");
+        if(isRecovery == 0){
+            AddJournal("mkusr",COMMS,664,"users.txt","Archivo");
+            Print_Msg("MKUSR","SUCCESS","Usuario",nwInf->_usr,"Creado Exitosamente");
+        }
+        
         mkusr_do(nwInf);
-        printf("\n");
-        printf("MKUSR SUCCESS: Usuario   -> %s <-   Creado Exitosamente\n",nwInf->_usr);
+        //printf("\n");
+        //printf("MKUSR SUCCESS: Usuario   -> %s <-   Creado Exitosamente\n",nwInf->_usr);
     }
 }
 
 void rmusr_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"RMUSR") == 0){
-        AddJournal("rmusr",COMMS,664,"users.txt","Archivo");
+        if(isRecovery == 0){
+            AddJournal("rmusr",COMMS,664,"users.txt","Archivo");
+            Print_Msg("RMUSR","SUCCESS","Usuario",nwInf->_usr,"Eliminado Exitosamente");
+        }
+        
         rmusr_do(nwInf);
-        printf("\n");
-        printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
+        //printf("\n");
+        //printf("RMUSR SUCCESS: Usuario   -> %s <-   Eliminado Exitosamente\n",nwInf->_usr); 
     }
 }
 
 void mkdir_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKDIR") == 0){
         char* DirName = Path_Get_LastDirName(nwInf->_path);
-        AddJournal("mkdir",COMMS,664,DirName,"Folder");
+        if(isRecovery == 0){
+            AddJournal("mkdir",COMMS,664,DirName,"Folder");
+            Print_Msg("MKDIR","SUCCESS","Folder",DirName,"Creado Exitosamente");
+        }
+        
         mkdir_do(nwInf);
         //char* FolderName = Path_get_Last_FolderName(nwInf->_path);
         //printf("\n");
@@ -694,10 +597,13 @@ void mkdir_cmd(InfoCatcher* nwInf){
 void mkfile_cmd(InfoCatcher* nwInf){
     if(ErrorManager(nwInf,"MKFILE") == 0){
         char* FileName = Path_Get_FileName(nwInf->_path);
-        AddJournal("mkfile",COMMS,664,FileName,"Archivo");
+        if(isRecovery == 0){
+            AddJournal("mkfile",COMMS,664,FileName,"Archivo");
+            printf("\n");
+            printf("MKFILE SUCCESS: Archivo   -> %s <-   Creado Exitosamente\n",FileName);
+        }
+        
         mkfile_do(nwInf);
-        printf("\n");
-        printf("MKFILE SUCCESS: Archivo   -> %s <-   Creado Exitosamente\n",FileName); 
     }
 }
 
@@ -709,14 +615,18 @@ void rem_cmd(InfoCatcher* nwInf){
         int  istxt = Check_If_Is_txtFile(tmp);
         rem_do(tmp,istxt);
         if(istxt == 1){
-            AddJournal("rem",COMMS,664,tmp,"Archivo");
-            printf("\n");
-            printf("REM SUCCESS: Archivo   -> %s <-   Eliminado Exitosamente\n",tmp); 
+            if(isRecovery == 0){
+                AddJournal("rem",COMMS,664,tmp,"Archivo");
+                printf("\n");
+                printf("REM SUCCESS: Archivo   -> %s <-   Eliminado Exitosamente\n",tmp); 
+            }
         }
         else{
-            AddJournal("rem",COMMS,664,tmp,"Folder");
-            printf("\n");
-            printf("REM SUCCESS: Folder   -> %s <-   Eliminado Exitosamente\n",tmp); 
+            if(isRecovery == 0){
+                AddJournal("rem",COMMS,664,tmp,"Folder");
+                printf("\n");
+                printf("REM SUCCESS: Folder   -> %s <-   Eliminado Exitosamente\n",tmp);
+            }
         }
     }
 }
@@ -729,14 +639,19 @@ void mv_cmd(InfoCatcher* nwInf){
         int  istxt = Check_If_Is_txtFile(tmp);
         mv_do(nwInf);
         if(istxt == 1){
-            AddJournal("mv",COMMS,664,tmp,"Archivo");
-            printf("\n");
-            printf("MV SUCCESS: Archivo   -> %s <-   Movido Exitosamente\n",tmp); 
+            if(isRecovery == 0){
+                AddJournal("mv",COMMS,664,tmp,"Archivo");
+                printf("\n");
+                printf("MV SUCCESS: Archivo   -> %s <-   Movido Exitosamente\n",tmp); 
+            }
         }
         else{
-            AddJournal("mv",COMMS,664,tmp,"Folder");
-            printf("\n");
-            printf("MV SUCCESS: Folder   -> %s <-   Movido Exitosamente\n",tmp); 
+            if(isRecovery == 0){
+                AddJournal("mv",COMMS,664,tmp,"Folder");
+                printf("\n");
+                printf("MV SUCCESS: Folder   -> %s <-   Movido Exitosamente\n",tmp); 
+            }
+            
         }
     }
 }
@@ -868,9 +783,14 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
             return 0;
         }
         
+        if(isRecovery == 0){
+            AddJournal("logout",COMMS,664,"users.txt","Archivo");
+            printf("\n");
+            printf("LOGOUT SUCCESS: Sesion Cerrada Exitosamente...\n");
+        }
+        
         Omni = newGLS();
-        printf("\n");
-        printf("LOGOUT SUCCESS: Sesion Cerrada Exitosamente...\n");
+        
         return 0;
     }
     else if (strcasecmp(Bf, "mkgrp") == 0){
@@ -973,8 +893,11 @@ int ScanF2(char* Bf,InfoCatcher* nwInf){
 void ExecuteComand(char *InputString){
 
     //system("clear");
-    AppDiv();
-    printf("CommandLine->   %s\n",InputString);
+    if(isRecovery == 0){
+        AppDiv();
+        printf("CommandLine->   %s\n",InputString);
+    }
+    
 
     if (*(InputString) == '\n'){
         return;
@@ -1033,6 +956,11 @@ void ExecuteComand(char *InputString){
     if (strcasecmp(Main_CMD, "recovery") == 0){
         if(ErrorManager(nwInf,"RECOVERY") == 0){
             setOmni(nwInf->_id);
+            isRecovery = 1;
+
+            clear_blockBits();
+            clear_inodeBits();
+            Load_Defaut_txt(newInfoCatcher());
 
             int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
 
@@ -1040,23 +968,38 @@ void ExecuteComand(char *InputString){
             int i = 0;
             
             while(i < iN){
-                Journaling* tmp = (Journaling*)BinLoad_Str(Jr_StartByte + (i * sizeof(Journaling)),"Journaling");
+                int index = Jr_StartByte + (i * sizeof(Journaling));
+                Journaling* tmp = (Journaling*)BinLoad_Str(index,"Journaling");
                 char* CMD   = newString(tmp->CMD);
                 char* Param = newString(tmp->Content);
+                if(strcasecmp(Param,"mv -path~:~/home/wrm/Desktop/a1.txt -dest~:~/home/wrm") == 0){
+                    int aa = 8;
+                }
                 if(tmp->isOccupied == '0' || tmp->isOccupied != '1'){
                     break;
                 }
+
                 if(tmp->isOccupied != '0'){
-                    ExecuteComand(CMD);
+                    int a = 85;
+                    //if(strcasecmp(CMD,"login") == 0) Omni->LoggedUser = NULL;
+                    ExecuteComand(Param);
+                    //if(strcasecmp(CMD,"loging") == 0) setOmni(nwInf->_id);
                 }
+                if(strcasecmp(CMD,"logout") == 0) setOmni(nwInf->_id);
+                
                 i++;
             }
             Omni = newGLS();
+            isRecovery = 0;
+
+            printf("\n");
+            printf("Recovery SUCCESS: Recuparacion de la Particion -> %s <- Generada con Exito\n",nwInf->_id);
         }
+
 
         AppDiv();
         Div2();
-        return ;
+        return;
     }
 
     //-----------------------------------------------------------------------------------------
@@ -1091,8 +1034,11 @@ void ExecuteComand(char *InputString){
         }
     }   
 
-    AppDiv();
-    Div2();
+    if(isRecovery == 0){
+        AppDiv();
+        Div2();
+    }
+    
     //getchar();
 }
 
