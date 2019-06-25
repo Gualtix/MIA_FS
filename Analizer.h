@@ -795,6 +795,30 @@ void ExecuteComand(char *InputString){
     DoublyGenericList* CommandList = new_DoublyGenericList();
 
     char* Main_CMD = strtok(InputString, " ");
+    if(strcasecmp(Main_CMD,"chmod") == 0){
+        return;
+    }
+
+    if(strcasecmp(Main_CMD,"chgrp") == 0){
+        return;
+    }
+
+    if(strcasecmp(Main_CMD,"find") == 0){
+        return;
+    }
+
+    if(strcasecmp(Main_CMD,"cp") == 0){
+        return;
+    }
+
+    if(strcasecmp(Main_CMD,"cat") == 0){
+        return;
+    }
+
+    if(strcasecmp(Main_CMD,"chown") == 0){
+        return;
+    }
+
     int unknownCMD = 1;
     FillCommandList(Main_CMD,CommandList);
 

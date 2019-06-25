@@ -27,7 +27,7 @@ int main()
         printf("(^< ............ ............ ............\n");
         printf("Ready to Execute:\n");
         //char *InputString = CatchCommandLine();
-        char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/EntradaF2.sh");
+        char *InputString = newString("exec -path~:~/home/wrm/Desktop/EXEC_FILES/Unico.sh");
         int Rs = strcasecmp(InputString, "exit\n");
         ExecuteComand(InputString);
         if (Rs == 0){

@@ -1227,9 +1227,15 @@ void LsTravel(FILE* DotFl,int Bit_ID){
 
 void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
 
-    DoublyGenericList* Ph = PathSeparate(_ruta);
-    Pop(Ph);
-    char* Name = (char*)Pop(Ph);
+    char* Name = newString("hola");
+    if(strcasecmp(_ruta,"/") != 0){
+        DoublyGenericList* Ph = PathSeparate(_ruta);
+        Pop(Ph);
+        Name = (char*)Pop(Ph);
+    }
+
+    
+    
    
     char* DotPath = get_DotExt_Path(CompleteReportPathDir);
     int iN = Calc_iN(Omni->PartBatch_inUse->Size);
@@ -1259,7 +1265,15 @@ void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
                 fprintf(DotFl,"\t\t\t\t\t<TABLE BGCOLOR = \"#99c2ff\" BORDER = \"0\" CELLBORDER = \"1\" CELLSPACING = \"0\">\n");
 
                 fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Permision</TD><TD>Owner</TD><TD>Group</TD><TD>Size_in_Bytes</TD><TD>Date</TD><TD>Type</TD><TD>Name</TD></TR>\n");
-                SeekInfo* nsk = CompleteSeeker(0,Name);
+                SeekInfo* nsk = NULL;
+                if(strcasecmp(_ruta,"/") != 0){
+                    nsk = CompleteSeeker(0,Name);
+                }
+                else{
+                    nsk = newSeekInfo();
+                    nsk->iNode_Bit_ID = 0;
+                }
+
                 LsTravel(DotFl,nsk->iNode_Bit_ID);
                 fprintf(DotFl,"\t\t\t\t\t</TABLE>\n");
             fprintf(DotFl,"\t\t\t\t>\n");
