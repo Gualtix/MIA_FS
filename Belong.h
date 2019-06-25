@@ -9,6 +9,8 @@
 
 
 
+
+
 int MBRPartArray_ExtendedCounter(MBR* Bf){
     int cnt = 0;
     int i  = 0;
@@ -1735,7 +1737,7 @@ void AddJournal(char* CMD,char* Content,int Permits,char* Name,char* Type){
     }
 
     char Tp = '0';
-    if(strcasecmp(Type,"Archivo")){
+    if(strcasecmp(Type,"Archivo") == 0){
         Tp = '1';
     }
 

@@ -18,7 +18,9 @@
         "f1_do.h": "c",
         "container2.h": "c",
         "stdio.h": "c",
-        "stdlib.h": "c"
+        "stdlib.h": "c",
+        "doublygenericlist.h": "c",
+        "f2_rep.h": "c"
     },
     "workbench.colorCustomizations": {
         //"activityBar.background": "#06011b",

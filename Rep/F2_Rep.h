@@ -17,6 +17,151 @@
 #include <string.h>
 #include <math.h>
 
+InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf){
+
+    char* Prm_Izq = NULL;
+    char* Prm_Der = NULL;
+
+    while(CommandList->Length > 0){
+
+        Prm_Izq = (char*)DeQueue(CommandList);
+        Prm_Der = (char*)DeQueue(CommandList);
+
+        if(strcasecmp(Prm_Izq,"-path") != 0 && strcasecmp(Prm_Izq,"-name") != 0 && strcasecmp(Prm_Izq,"-usr") != 0 && strcasecmp(Prm_Izq,"-pwd") != 0 && strcasecmp(Prm_Izq,"-cont") != 0 && strcasecmp(Prm_Izq,"-ruta") != 0){
+            if(Prm_Der != NULL){
+                String_ByRef_toLower(&Prm_Der);
+            }
+        }
+
+        //(^< ............ ............ ............   _size
+        if(strcasecmp(Prm_Izq,"-size") == 0){
+            int Nm = atoi(Prm_Der);
+            (*nwInf)->_size =  atoi(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _fit
+        if(strcasecmp(Prm_Izq,"-fit") == 0){
+            (*nwInf)->_fit = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _unit
+        if(strcasecmp(Prm_Izq,"-unit") == 0){
+            (*nwInf)->_unit = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _path
+        if(strcasecmp(Prm_Izq,"-path") == 0){
+            (*nwInf)->_path = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _type
+        if(strcasecmp(Prm_Izq,"-type") == 0){
+            (*nwInf)->_type = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _delete
+        if(strcasecmp(Prm_Izq,"-delete") == 0){
+            (*nwInf)->_delete = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _add
+        if(strcasecmp(Prm_Izq,"-add") == 0){
+            int Nm = atoi(Prm_Der);
+            (*nwInf)->_add =  atoi(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _name
+        if(strcasecmp(Prm_Izq,"-name") == 0){
+            (*nwInf)->_name = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _id
+        if(strcasecmp(Prm_Izq,"-id") == 0){
+            (*nwInf)->_id = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _fs
+        if(strcasecmp(Prm_Izq,"-fs") == 0){
+            (*nwInf)->_fs = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _usr
+        if(strcasecmp(Prm_Izq,"-usr") == 0){
+            (*nwInf)->_usr = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _pwd
+        if(strcasecmp(Prm_Izq,"-pwd") == 0){
+            (*nwInf)->_pwd = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _grp
+        if(strcasecmp(Prm_Izq,"-grp") == 0){
+            (*nwInf)->_grp= newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _P
+        if(!strcasecmp(Prm_Izq,"-P")){
+            (*nwInf)->_P = 1;
+            if(Prm_Der != NULL){
+                FrontInsert(CommandList,Prm_Der);
+            }
+            continue;
+        }
+
+        //(^< ............ ............ ............   _R
+        if(!strcasecmp(Prm_Izq,"-R")){
+            (*nwInf)->_R = 1;
+            FrontInsert(CommandList,Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _cont
+        if(!strcasecmp(Prm_Izq,"-cont")){
+            (*nwInf)->_cont = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _cont
+        if(!strcasecmp(Prm_Izq,"-ruta")){
+            (*nwInf)->_ruta = newString(Prm_Der);
+            continue;
+        }
+
+        //(^< ............ ............ ............   _dest
+        if(!strcasecmp(Prm_Izq,"-dest")){
+            (*nwInf)->_dest = newString(Prm_Der);
+            continue;
+        }
+    }
+}
+
+void FillCommandList(char* Bf,DoublyGenericList* CommandList){
+
+    while(1){
+
+        Bf = strtok(NULL," ~:~");
+        if(Bf == NULL){
+            break;
+        }
+
+        EnQueue(CommandList,Bf);
+    }    
+}
+
 void Add_Div(FILE* DotFl){
     fprintf(DotFl,"\t\t\t\t<TR>\n");
         fprintf(DotFl,"\t\t\t\t\t<TD width = \"150\" colspan=\"2\">\n");
@@ -1127,6 +1272,8 @@ void Generate_Ls_Rep(char* CompleteReportPathDir,char* _ruta){
     }
 }
 
+
+
 void Add_Jr_Body(FILE* DotFl){
 
     int Jr_StartByte = Omni->PartBatch_inUse->StartByte + sizeof(SuperBlock);
@@ -1142,16 +1289,60 @@ void Add_Jr_Body(FILE* DotFl){
             break;
         }
         if(tmp->isOccupied != '0'){
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
-            //fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>En Uso</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isOccupied);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Operacion</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->CMD);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Nombre</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->File_of_FolderName);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Tipo</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isFile_or_Folder);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Contenido</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Content);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Fecha</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Date);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Propietario</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Owner);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Permisos</TD><TD bgcolor=\"#ffffff\">%i</TD></TR>\n",tmp->Permits);
-            fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
+            if(strcasecmp(CMD,"login") != 0 && strcasecmp(CMD,"logout") != 0){
+
+                DoublyGenericList* CommandList = new_DoublyGenericList();
+                char* Main_CMD = strtok(Param, " ");
+                FillCommandList(Main_CMD,CommandList);
+                InfoCatcher* nwInf = newInfoCatcher();
+                fillInfoCatcher(CommandList,&nwInf);
+                char* Cnt = nwInf->_path;
+                if(nwInf->_path == NULL){
+
+                    if(strcasecmp(CMD,"mkgrp") == 0){
+                        Cnt = nwInf->_name;
+                    }
+
+                    if(strcasecmp(CMD,"rmgrp") == 0){
+                        Cnt = nwInf->_name;
+                    }
+
+                    if(strcasecmp(CMD,"mkusr") == 0){
+                        Cnt = Concat_Izq_with_Der(nwInf->_usr,newString(","),'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,nwInf->_pwd,'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,newString(","),'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,nwInf->_grp,'s','s');
+                    }
+
+                    if(strcasecmp(CMD,"rmusr") == 0){
+                        Cnt = nwInf->_usr;
+                    }
+                }
+
+                if(strcasecmp(CMD,"mkfile") == 0){
+                        Cnt = Concat_Izq_with_Der(nwInf->_path,newString(","),'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,toString(&nwInf->_size,'i'),'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,newString(","),'s','s');
+                        Cnt = Concat_Izq_with_Der(Cnt,nwInf->_cont,'s','s');
+                    }
+
+                if(strcasecmp(CMD,"mv") == 0){
+                    Cnt = Concat_Izq_with_Der(nwInf->_path,newString(","),'s','s');
+                    Cnt = Concat_Izq_with_Der(Cnt,nwInf->_dest,'s','s');
+                }
+                
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
+                //fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>En Uso</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isOccupied);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Operacion</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->CMD);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Nombre</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->File_of_FolderName);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Tipo</TD><TD bgcolor=\"#ffffff\">%c</TD></TR>\n",tmp->isFile_or_Folder);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Contenido</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",Cnt);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Fecha</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Date);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Propietario</TD><TD bgcolor=\"#ffffff\">%s</TD></TR>\n",tmp->Owner);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD>Permisos</TD><TD bgcolor=\"#ffffff\">%i</TD></TR>\n",tmp->Permits);
+                fprintf(DotFl,"\t\t\t\t\t\t<TR><TD colspan=\"2\">**************************************************************************************</TD></TR>\n");
+            }
+            
         }
         i++;
     }

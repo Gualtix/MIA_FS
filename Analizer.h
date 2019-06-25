@@ -14,6 +14,7 @@
 
 
 #include "Rep/F1_Rep.h"
+#include "Rep/F2_Rep.h"
 #include "Validate.h"
 
 #include "F1_do.h"
@@ -23,137 +24,7 @@
 //(^< ............ ............ ............ ............ ............ T O O L S
 //(^< ............ ............ ............ ............ ............ ............ ............ ............ ............ ............
 
-InfoCatcher* fillInfoCatcher(DoublyGenericList* CommandList,InfoCatcher** nwInf){
 
-    char* Prm_Izq = NULL;
-    char* Prm_Der = NULL;
-
-    while(CommandList->Length > 0){
-
-        Prm_Izq = (char*)DeQueue(CommandList);
-        Prm_Der = (char*)DeQueue(CommandList);
-
-        if(strcasecmp(Prm_Izq,"-path") != 0 && strcasecmp(Prm_Izq,"-name") != 0 && strcasecmp(Prm_Izq,"-usr") != 0 && strcasecmp(Prm_Izq,"-pwd") != 0 && strcasecmp(Prm_Izq,"-cont") != 0 && strcasecmp(Prm_Izq,"-ruta") != 0){
-            if(Prm_Der != NULL){
-                String_ByRef_toLower(&Prm_Der);
-            }
-        }
-
-        //(^< ............ ............ ............   _size
-        if(strcasecmp(Prm_Izq,"-size") == 0){
-            int Nm = atoi(Prm_Der);
-            (*nwInf)->_size =  atoi(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _fit
-        if(strcasecmp(Prm_Izq,"-fit") == 0){
-            (*nwInf)->_fit = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _unit
-        if(strcasecmp(Prm_Izq,"-unit") == 0){
-            (*nwInf)->_unit = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _path
-        if(strcasecmp(Prm_Izq,"-path") == 0){
-            (*nwInf)->_path = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _type
-        if(strcasecmp(Prm_Izq,"-type") == 0){
-            (*nwInf)->_type = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _delete
-        if(strcasecmp(Prm_Izq,"-delete") == 0){
-            (*nwInf)->_delete = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _add
-        if(strcasecmp(Prm_Izq,"-add") == 0){
-            int Nm = atoi(Prm_Der);
-            (*nwInf)->_add =  atoi(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _name
-        if(strcasecmp(Prm_Izq,"-name") == 0){
-            (*nwInf)->_name = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _id
-        if(strcasecmp(Prm_Izq,"-id") == 0){
-            (*nwInf)->_id = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _fs
-        if(strcasecmp(Prm_Izq,"-fs") == 0){
-            (*nwInf)->_fs = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _usr
-        if(strcasecmp(Prm_Izq,"-usr") == 0){
-            (*nwInf)->_usr = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _pwd
-        if(strcasecmp(Prm_Izq,"-pwd") == 0){
-            (*nwInf)->_pwd = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _grp
-        if(strcasecmp(Prm_Izq,"-grp") == 0){
-            (*nwInf)->_grp= newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _P
-        if(!strcasecmp(Prm_Izq,"-P")){
-            (*nwInf)->_P = 1;
-            if(Prm_Der != NULL){
-                FrontInsert(CommandList,Prm_Der);
-            }
-            continue;
-        }
-
-        //(^< ............ ............ ............   _R
-        if(!strcasecmp(Prm_Izq,"-R")){
-            (*nwInf)->_R = 1;
-            FrontInsert(CommandList,Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _cont
-        if(!strcasecmp(Prm_Izq,"-cont")){
-            (*nwInf)->_cont = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _cont
-        if(!strcasecmp(Prm_Izq,"-ruta")){
-            (*nwInf)->_ruta = newString(Prm_Der);
-            continue;
-        }
-
-        //(^< ............ ............ ............   _dest
-        if(!strcasecmp(Prm_Izq,"-dest")){
-            (*nwInf)->_dest = newString(Prm_Der);
-            continue;
-        }
-    }
-}
 
 void Exec_CMD(DoublyGenericList* CommandList){
 
@@ -202,18 +73,7 @@ void Exec_CMD(DoublyGenericList* CommandList){
     }
 }
 
-void FillCommandList(char* Bf,DoublyGenericList* CommandList){
 
-    while(1){
-
-        Bf = strtok(NULL," ~:~");
-        if(Bf == NULL){
-            break;
-        }
-
-        EnQueue(CommandList,Bf);
-    }    
-}
 
 char *CatchCommandLine(){
 
@@ -995,8 +855,6 @@ void ExecuteComand(char *InputString){
             printf("\n");
             printf("Recovery SUCCESS: Recuparacion de la Particion -> %s <- Generada con Exito\n",nwInf->_id);
         }
-
-
         AppDiv();
         Div2();
         return;
